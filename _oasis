@@ -6,12 +6,12 @@ Authors:     G. Deest
 License:     MIT
 Plugins:     DevFiles (0.4)
 
-Library "ocaml-isl"
+Library "isl"
   Path:            src/
   BuildTools:      ocamlbuild
   BuildDepends: ctypes, ctypes.foreign
   CompiledObject: native
-  FindlibName: ocaml-isl
+  FindlibName: isl
   Modules: Isl, IslCtx, IslIlp, IslSet, IslMap, IslUnionMap, IslUnionSet, IslConstraint, IslAff, IslSpace, IslVal, IslId, IslLocalSpace
   InternalModules: IslMemory, BindingTypes, gen/In_Ctx, gen/In_Ilp, gen/In_Set, gen/In_Map, gen/In_UnionMap, gen/In_Constraint, gen/In_Aff, gen/In_Space, gen/In_Val, gen/In_Id, gen/In_LocalSpace, gen/In_UnionSet
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
@@ -20,12 +20,13 @@ Library "ocaml-isl"
 Executable setops
   Install: false
   Path:       src-tests
-  BuildDepends: ocaml-isl
+  Build$: flag(tests)
+  BuildDepends: isl
   BuildTools: ocamlbuild
   CompiledObject: native
   MainIs:     setops.ml
  
-# Test "Set operations"
-#   Type: Custom (0.0.1)
-#   Command: $setops
-#   WorkingDirectory: /tmp
+Test "Set operations"
+  Type: Custom (0.0.1)
+  Command: $setops
+  WorkingDirectory: /tmp
