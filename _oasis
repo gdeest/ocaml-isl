@@ -1,0 +1,32 @@
+OASISFormat: 0.4
+Name:        ocaml-isl
+Version:     0.0.1
+Synopsis:    OCaml bindings for ISL
+Authors:     G. Deest
+License:     MIT
+Plugins:     DevFiles (0.4)
+
+Library "ocaml-isl"
+  Path:            src/
+  BuildTools:      ocamlbuild
+  BuildDepends: ctypes, ctypes.foreign
+  Pack: True
+  CompiledObject: best
+  FindlibName: Isl
+  Modules: Isl, IslCtx, IslIlp, IslSet, IslMap, IslUnionMap, IslUnionSet, IslConstraint, IslAff, IslSpace, IslVal, IslId, IslLocalSpace
+  InternalModules: IslMemory
+  CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
+  CCLib: -lisl
+  
+Executable setops
+  Install: false
+  Path:       src/tests
+  BuildDepends: Isl
+  BuildTools: ocamlbuild
+  CompiledObject: native
+  MainIs:     setops.ml
+  
+Test "Set operations"
+  Type: Custom (0.0.1)
+  Command: $setops
+  WorkingDirectory: /tmp

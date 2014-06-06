@@ -1,0 +1,43 @@
+# OASIS_START
+# DO NOT EDIT (digest: 56fb42724eae54e95abd039977859ce4)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library ocaml-isl
+"src/ocaml-isl.cmxs": use_ocaml-isl
+"src/isl.cmx": for-pack(Ocaml-isl)
+"src/islCtx.cmx": for-pack(Ocaml-isl)
+"src/islIlp.cmx": for-pack(Ocaml-isl)
+"src/islSet.cmx": for-pack(Ocaml-isl)
+"src/islMap.cmx": for-pack(Ocaml-isl)
+"src/islUnionMap.cmx": for-pack(Ocaml-isl)
+"src/islUnionSet.cmx": for-pack(Ocaml-isl)
+"src/islConstraint.cmx": for-pack(Ocaml-isl)
+"src/islAff.cmx": for-pack(Ocaml-isl)
+"src/islSpace.cmx": for-pack(Ocaml-isl)
+"src/islVal.cmx": for-pack(Ocaml-isl)
+"src/islId.cmx": for-pack(Ocaml-isl)
+"src/islLocalSpace.cmx": for-pack(Ocaml-isl)
+"src/islMemory.cmx": for-pack(Ocaml-isl)
+<src/*.ml{,i}>: oasis_library_ocaml_isl_ccopt
+<src/ocaml-isl.{cma,cmxa}>: oasis_library_ocaml_isl_cclib
+<src/*.ml{,i}>: pkg_ctypes
+<src/*.ml{,i}>: pkg_ctypes.foreign
+# Executable setops
+"src/tests/setops.native": pkg_ctypes
+"src/tests/setops.native": pkg_ctypes.foreign
+"src/tests/setops.native": use_ocaml-isl
+<src/tests/*.ml{,i}>: pkg_ctypes
+<src/tests/*.ml{,i}>: pkg_ctypes.foreign
+<src/tests/*.ml{,i}>: use_ocaml-isl
+# OASIS_STOP
