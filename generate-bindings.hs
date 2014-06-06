@@ -442,7 +442,7 @@ writeModule (Module identifier functions) =
           writeFuns funs h
         funs = S.toList functions
         moduleFileName = case identifier of
-          (x:xs) -> "src/isl" ++ identifier ++ ".ml"
+          (x:xs) -> "src/gen/in_" ++ identifier ++ ".ml"
           _ -> error "Empty module identifier !"
         
 main :: IO ()
