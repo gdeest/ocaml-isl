@@ -12,7 +12,7 @@ Library "ocaml-isl"
   BuildDepends: ctypes, ctypes.foreign
   Pack: True
   CompiledObject: best
-  FindlibName: Isl
+  FindlibName: ocaml-isl
   Modules: Isl, IslCtx, IslIlp, IslSet, IslMap, IslUnionMap, IslUnionSet, IslConstraint, IslAff, IslSpace, IslVal, IslId, IslLocalSpace
   InternalModules: IslMemory
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
