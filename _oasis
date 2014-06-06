@@ -10,18 +10,17 @@ Library "ocaml-isl"
   Path:            src/
   BuildTools:      ocamlbuild
   BuildDepends: ctypes, ctypes.foreign
-  Pack: True
-  CompiledObject: best
+  CompiledObject: native
   FindlibName: ocaml-isl
   Modules: Isl, IslCtx, IslIlp, IslSet, IslMap, IslUnionMap, IslUnionSet, IslConstraint, IslAff, IslSpace, IslVal, IslId, IslLocalSpace
-  InternalModules: IslMemory
+  InternalModules: IslMemory, BindingTypes, gen/In_Ctx, gen/In_Ilp, gen/In_Set, gen/In_Map, gen/In_UnionMap, gen/In_Constraint, gen/In_Aff, gen/In_Space, gen/In_Val, gen/In_Id, gen/In_LocalSpace
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
   CCLib: -lisl
   
 Executable setops
   Install: false
-  Path:       src/tests
-  BuildDepends: Isl
+  Path:       src-tests
+  BuildDepends: ocaml-isl
   BuildTools: ocamlbuild
   CompiledObject: native
   MainIs:     setops.ml
