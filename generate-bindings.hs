@@ -181,19 +181,19 @@ toCamlDeclaration (ISLFunction annots t name params) = do
   wrappedParams <- fmap concat (sequence $ map wrapParam params)
   retWrap <- gcWrap
   let paramPart = concat (intersperse " @-> " mlParamTypes)
-  let cFun = "\tlet "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ") in\n"
-  return $ header ++ wrappedParams ++ cFun ++ cFunCall ++ retWrap ++ "\tret\n"
+  let cFun = "    let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ") in\n"
+  return $ header ++ wrappedParams ++ cFun ++ cFunCall ++ retWrap ++ "    ret\n"
   where header = "let " ++ funName ++ " " ++ paramList ++ " = \n"
         funName = if isPrefixOf "isl_" name then drop 4 name else name
         wrapParam (ISLParam annots t name) =
           if elem ISL_TAKE annots then
             do (copyFun,_) <- lookupMemFunctions t
-               return $ "\tlet " ++ name ++ " = " ++ copyFun ++ " " ++ name ++ " in\n"
+               return $ "    let " ++ name ++ " = " ++ copyFun ++ " " ++ name ++ " in\n"
           else return ""
-        cFunCall = "\tlet ret = " ++ name ++ " " ++ paramList ++ " in\n"
+        cFunCall = "    let ret = " ++ name ++ " " ++ paramList ++ " in\n"
         gcWrap = if elem ISL_GIVE annots then
                    do (_,freeFun) <- lookupMemFunctions t
-                      return $ "\tGc.finalise " ++ freeFun ++ " ret;\n"
+                      return $ "    Gc.finalise " ++ freeFun ++ " ret;\n"
                  else return ""
         paramList = concat (intersperse " " paramNames)
         paramNames = map (\(ISLParam _ _ id) -> id) params
