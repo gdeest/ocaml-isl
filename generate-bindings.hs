@@ -256,7 +256,7 @@ writeModule name functions =
       let (x:xs) = name      
       withFile ("src/gen/"++((toLower x):xs)++".ml") WriteMode$ \h -> do
         hPutStrLn h $ "open In_" ++ name
-        hPutStrLn h $ "module Make (Ctx: Sig_Context.S): Sig_"++name++".S = struct"
+        hPutStrLn h $ "module Make (Ctx: Sig_Context.S): Sig_"++name++".S with module Types = Types = struct"
         hPutStrLn h "    module Types = Types"
         hPutStrLn h ""
         mapM_ (writeFunction inh sigh h) functions

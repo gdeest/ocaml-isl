@@ -1,5 +1,5 @@
 open In_IslBasicSet
-module Make (Ctx: Sig_Context.S): Sig_IslBasicSet.S = struct
+module Make (Ctx: Sig_Context.S): Sig_IslBasicSet.S with module Types = Types = struct
     module Types = Types
 
     let compare_at = compare_at Ctx.ctx

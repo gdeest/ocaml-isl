@@ -1,5 +1,5 @@
 open In_IslLocalSpace
-module Make (Ctx: Sig_Context.S): Sig_IslLocalSpace.S = struct
+module Make (Ctx: Sig_Context.S): Sig_IslLocalSpace.S with module Types = Types = struct
     module Types = Types
 
     let dim = dim Ctx.ctx

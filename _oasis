@@ -12,9 +12,9 @@ Library "isl"
   BuildDepends: ctypes, ctypes.foreign
   CompiledObject: native
   FindlibName: isl
-  Modules: Isl, sigs/Sig_Context, Ctx, Errors, Types, sigs/Sig_Context, sigs/Sig_Types, gen/In_IslAff, gen/In_IslBasicMap, gen/In_IslBasicSet, gen/In_IslConstraint, gen/In_IslId, gen/In_IslLocalSpace, gen/In_IslMap, gen/In_IslSet, gen/In_IslUnionMap, gen/In_IslUnionSet, gen/In_IslValue, gen/IslAff, gen/IslBasicMap, gen/IslBasicSet, gen/IslConstraint, gen/IslId, gen/IslLocalSpace, gen/IslMap, gen/IslMap, gen/IslSet, gen/IslUnionMap, gen/IslUnionSet, gen/IslValue, gen/sigs/Sig_IslAff, gen/sigs/Sig_IslBasicMap, gen/sigs/Sig_IslBasicSet, gen/sigs/Sig_IslConstraint, gen/sigs/Sig_IslId, gen/sigs/Sig_IslLocalSpace, gen/sigs/Sig_IslMap, gen/sigs/Sig_IslSet, gen/sigs/Sig_IslUnionMap, gen/sigs/Sig_IslUnionSet, gen/sigs/Sig_IslValue
+  Modules: Isl, sigs/Sig_Context, Ctx, Errors, Types, IslMemory, sigs/Sig_Types, gen/In_IslAff, gen/In_IslBasicMap, gen/In_IslBasicSet, gen/In_IslConstraint, gen/In_IslId, gen/In_IslLocalSpace, gen/In_IslMap, gen/In_IslSet, gen/In_IslUnionMap, gen/In_IslUnionSet, gen/In_IslValue, gen/IslAff, gen/IslBasicMap, gen/IslBasicSet, gen/IslConstraint, gen/IslId, gen/IslLocalSpace, gen/IslMap, gen/IslSet, gen/IslUnionMap, gen/IslUnionSet, gen/IslValue, gen/sigs/Sig_IslAff, gen/sigs/Sig_IslBasicMap, gen/sigs/Sig_IslBasicSet, gen/sigs/Sig_IslConstraint, gen/sigs/Sig_IslId, gen/sigs/Sig_IslLocalSpace, gen/sigs/Sig_IslMap, gen/sigs/Sig_IslSet, gen/sigs/Sig_IslUnionMap, gen/sigs/Sig_IslUnionSet, gen/sigs/Sig_IslValue
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
-  CCLib: -lisl
+  CCLib: -L/usr/local/lib -lisl
 
 # Executable setops
 #   Install: false

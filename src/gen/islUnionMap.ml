@@ -1,5 +1,5 @@
 open In_IslUnionMap
-module Make (Ctx: Sig_Context.S): Sig_IslUnionMap.S = struct
+module Make (Ctx: Sig_Context.S): Sig_IslUnionMap.S with module Types = Types = struct
     module Types = Types
 
     let n_map = n_map Ctx.ctx

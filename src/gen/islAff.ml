@@ -1,5 +1,5 @@
 open In_IslAff
-module Make (Ctx: Sig_Context.S): Sig_IslAff.S = struct
+module Make (Ctx: Sig_Context.S): Sig_IslAff.S with module Types = Types = struct
     module Types = Types
 
     let dim = dim Ctx.ctx

@@ -1,5 +1,5 @@
 open In_IslUnionSet
-module Make (Ctx: Sig_Context.S): Sig_IslUnionSet.S = struct
+module Make (Ctx: Sig_Context.S): Sig_IslUnionSet.S with module Types = Types = struct
     module Types = Types
 
     let n_set = n_set Ctx.ctx

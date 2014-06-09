@@ -1,5 +1,5 @@
 open In_IslValue
-module Make (Ctx: Sig_Context.S): Sig_IslValue.S = struct
+module Make (Ctx: Sig_Context.S): Sig_IslValue.S with module Types = Types = struct
     module Types = Types
 
     let sgn = sgn Ctx.ctx
