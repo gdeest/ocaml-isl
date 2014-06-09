@@ -2,6 +2,9 @@ PKG ctypes
 PKG ctypes.foreign
 PKG cil
 S src/
+S src/sigs
+S src/gen
+S src/gen/sigs
 S src/tests/
 
 B _build/src

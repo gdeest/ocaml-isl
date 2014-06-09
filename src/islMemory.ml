@@ -1,6 +1,6 @@
 open Ctypes
 open Foreign
-open Isl
+open Types
 
 let set_copy = foreign "isl_set_copy" (set @-> returning set)
 let set_free = foreign "isl_set_free" (set @-> returning void)

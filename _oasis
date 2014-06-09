@@ -4,7 +4,7 @@ Version:     0.0.1
 Synopsis:    OCaml bindings for ISL
 Authors:     G. Deest
 License:     MIT
-Plugins:     DevFiles (0.4)
+Plugins:     DevFiles (0.4), META (0.4)
 
 Library "isl"
   Path:            src/
@@ -12,21 +12,34 @@ Library "isl"
   BuildDepends: ctypes, ctypes.foreign
   CompiledObject: native
   FindlibName: isl
-  Modules: Isl, IslCtx, IslIlp, IslSet, IslMap, IslUnionMap, IslUnionSet, IslConstraint, IslAff, IslSpace, IslVal, IslId, IslLocalSpace
-  InternalModules: IslMemory, BindingTypes, gen/In_Ctx, gen/In_Ilp, gen/In_Set, gen/In_Map, gen/In_UnionMap, gen/In_Constraint, gen/In_Aff, gen/In_Space, gen/In_Val, gen/In_Id, gen/In_LocalSpace, gen/In_UnionSet
+  Modules: Isl, sigs/Sig_Context, Ctx, Errors, Types, sigs/Sig_Context, sigs/Sig_Types, gen/In_IslAff, gen/In_IslBasicMap, gen/In_IslBasicSet, gen/In_IslConstraint, gen/In_IslId, gen/In_IslLocalSpace, gen/In_IslMap, gen/In_IslSet, gen/In_IslUnionMap, gen/In_IslUnionSet, gen/In_IslValue, gen/IslAff, gen/IslBasicMap, gen/IslBasicSet, gen/IslConstraint, gen/IslId, gen/IslLocalSpace, gen/IslMap, gen/IslMap, gen/IslSet, gen/IslUnionMap, gen/IslUnionSet, gen/IslValue, gen/sigs/Sig_IslAff, gen/sigs/Sig_IslBasicMap, gen/sigs/Sig_IslBasicSet, gen/sigs/Sig_IslConstraint, gen/sigs/Sig_IslId, gen/sigs/Sig_IslLocalSpace, gen/sigs/Sig_IslMap, gen/sigs/Sig_IslSet, gen/sigs/Sig_IslUnionMap, gen/sigs/Sig_IslUnionSet, gen/sigs/Sig_IslValue
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
   CCLib: -lisl
-  
-Executable setops
+
+# Executable setops
+#   Install: false
+#   Path:       src-tests
+#   Build$: flag(tests)
+#   BuildDepends: isl
+#   BuildTools: ocamlbuild
+#   CompiledObject: native
+#   MainIs:     setops.ml
+ 
+# Test "Set operations"
+#   Type: Custom (0.0.1)
+#   Command: $setops
+#   WorkingDirectory: /tmp
+
+Executable hl
   Install: false
   Path:       src-tests
   Build$: flag(tests)
   BuildDepends: isl
   BuildTools: ocamlbuild
   CompiledObject: native
-  MainIs:     setops.ml
+  MainIs:     hlTest.ml
  
-Test "Set operations"
+Test "High-Level API"
   Type: Custom (0.0.1)
-  Command: $setops
+  Command: $hl
   WorkingDirectory: /tmp

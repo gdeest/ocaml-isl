@@ -24,6 +24,8 @@ import Language.C.Data.Ident
 import System.IO
 import System.IO.Unsafe
 
+import Control.Monad.State
+
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Control.Monad.Writer
@@ -62,6 +64,9 @@ data ISLParam = ISLParam [ISLAnnotation] ISLType Identifier
 data ISLFunction =  ISLFunction [ISLAnnotation] ISLType Identifier [ISLParam]
               deriving (Eq,Show,Ord)
 
+data MLFunction = MLFunction ISLFunction Identifier
+                 deriving (Eq,Show,Ord)
+
 data Module = Module String (S.Set ISLFunction)
 
 instance Show Module where
@@ -73,7 +78,8 @@ instance Show Module where
       functionList = S.foldr prependFunction "" functions
       prependFunction f str = (maybe "" id (toCamlDeclaration f)) ++ "\n" ++ str
 
-type ParseMonad = WriterT [Module] IO
+type ParseMonad = StateT (M.Map String (S.Set MLFunction)) IO
+-- type ParseMonad = WriterT [Module] IO
 
 defines :: [String]
 defines =
@@ -99,8 +105,7 @@ islDir :: String
 islDir = prefix ++ "isl/"
 
 readHeaders :: IO [String]
-readHeaders = return  [ "ctx.h"
-                      , "space.h"
+readHeaders = return  [ "space.h"
                       , "map.h"
                       , "union_map.h"
                       , "set.h"
@@ -150,25 +155,29 @@ moduleNameFromHeader header = camelize (reverse $ drop 2 $ reverse header)
 mlTypes :: M.Map ISLType String
 mlTypes = M.fromList [ (VOID, "void")
                      , (INT, "int")
-                     , (ISL_CTX_PTR, "Isl.ctx")
-                     , (ISL_SET_PTR, "Isl.set")
-                     , (ISL_BASIC_SET_PTR, "Isl.basic_set")
-                     , (ISL_UNION_SET_PTR, "Isl.union_set")
-                     , (ISL_MAP_PTR, "Isl.map")
-                     , (ISL_BASIC_MAP_PTR, "Isl.basic_map")
-                     , (ISL_UNION_MAP_PTR, "Isl.union_map")
-                     , (ISL_AFF_PTR, "Isl.aff")
-                     , (ISL_VAL_PTR, "Isl.value")
-                     , (ISL_SPACE_PTR, "Isl.space")
+                     , (ISL_CTX_PTR, "Ctx.t")
+                     , (ISL_SET_PTR, "Types.set")
+                     , (ISL_BASIC_SET_PTR, "Types.basic_set")
+                     , (ISL_UNION_SET_PTR, "Types.union_set")
+                     , (ISL_MAP_PTR, "Types.map")
+                     , (ISL_BASIC_MAP_PTR, "Types.basic_map")
+                     , (ISL_UNION_MAP_PTR, "Types.union_map")
+                     , (ISL_AFF_PTR, "Types.aff")
+                     , (ISL_VAL_PTR, "Types.value")
+                     , (ISL_SPACE_PTR, "Types.space")
                      , (CHAR_PTR, "string")
-                     , (BOOL, "Isl.bool")
-                     , (ISL_DIM_TYPE, "Isl.dim_type")
-                     , (ISL_LOCAL_SPACE_PTR, "Isl.local_space")
-                     , (ISL_ID_PTR, "Isl.id")
+                     , (BOOL, "bool")
+                     , (ISL_DIM_TYPE, "dim_type")
+                     , (ISL_LOCAL_SPACE_PTR, "Types.local_space")
+                     , (ISL_ID_PTR, "Types.id")
                      ]
+
+mlSigTypes = M.insert VOID "unit" mlTypes
 
 -- lookupType t | trace (show t) False = undefined
 lookupType t = M.lookup t mlTypes
+lookupSig t = M.lookup t mlSigTypes
+
 
 toCamlDeclaration :: ISLFunction -> Maybe String
 -- toCamlDeclaration f@(ISLFunction annots t name params) | trace name False = undefined
@@ -197,6 +206,77 @@ toCamlDeclaration (ISLFunction annots t name params) = do
                  else return ""
         paramList = concat (intersperse " " paramNames)
         paramNames = map (\(ISLParam _ _ id) -> id) params
+
+toInDecl :: MLFunction -> Maybe String
+toInDecl (MLFunction (ISLFunction annots t name params) mlName) = do
+  mlRetType <- lookupType t
+  mlParamTypes <-
+    case params of
+      [] -> return ["void"]
+      _ -> sequence $ map lookupType $ map (\(ISLParam _ t _) -> t) params
+  wrappedParams <- fmap concat (sequence $ map wrapParam params)
+  retWrap <- gcWrap
+  let paramPart = concat (intersperse " @-> " mlParamTypes)
+  let cFun = "    let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ") in\n"
+  return $ header ++ wrappedParams ++ cFun ++ cFunCall ++ "    check_for_errors ctx;\n" ++ retWrap ++"    ret\n"
+  where header = "let " ++ mlName ++ " " ++ mlParamList ++ " = \n"
+        funName = if isPrefixOf "isl_" name then drop 4 name else name
+        wrapParam (ISLParam annots t name) =
+          if elem ISL_TAKE annots then
+            do (copyFun,_) <- lookupMemFunctions t
+               return $ "    let " ++ name ++ " = " ++ copyFun ++ " " ++ name ++ " in\n"
+          else return ""
+        cFunCall = "    let ret = " ++ name ++ " " ++ paramList ++ " in\n"
+        gcWrap = if elem ISL_GIVE annots then
+                   do (_,freeFun) <- lookupMemFunctions t
+                      return $ "    Gc.finalise " ++ freeFun ++ " ret;\n"
+                 else return ""
+        paramList = concat (intersperse " " paramNames)
+        mlParamList = case params of
+          (ISLParam _ ISL_CTX_PTR "ctx"):_ -> paramList
+          _ -> "ctx " ++ paramList
+        paramNames = map (\(ISLParam _ _ id) -> id) params
+
+toDecl :: MLFunction -> Maybe String
+toDecl f = Just "Outside Decl"
+
+writeModule :: String -> [MLFunction] -> IO ()
+writeModule name functions =
+  withFile ("src/gen/in_"++name++".ml") WriteMode $ \inh -> do
+    hPutStrLn inh "open Types"
+    hPutStrLn inh "open Ctypes"
+    hPutStrLn inh "open Foreign"
+    hPutStrLn inh "open IslMemory"
+    hPutStrLn inh "open Errors"    
+    hPutStrLn inh ""
+    withFile ("src/gen/sigs/sig_"++name++".ml") WriteMode $ \sigh -> do
+      hPutStrLn sigh "open Types\n"
+      hPutStrLn sigh "module type S = sig"
+      hPutStrLn sigh "    module Types : Sig_Types.S"
+      let (x:xs) = name      
+      withFile ("src/gen/"++((toLower x):xs)++".ml") WriteMode$ \h -> do
+        hPutStrLn h $ "open In_" ++ name
+        hPutStrLn h $ "module Make (Ctx: Sig_Context.S): Sig_"++name++".S = struct"
+        hPutStrLn h "    module Types = Types"
+        hPutStrLn h ""
+        mapM_ (writeFunction inh sigh h) functions
+        hPutStrLn h "end"
+      hPutStrLn sigh "end"
+  where
+    writeFunction inh sigh h f@(MLFunction (ISLFunction _ t _ p) name) = do
+      let inDecl = toInDecl f
+      case inDecl of
+        Just d -> do
+          hPutStrLn inh d
+          hPutStrLn sigh $ "    val "++name++ " : " ++ sig
+          hPutStrLn h $ "    let " ++ name ++ " = " ++ name ++ " Ctx.ctx"
+          where sig = paramTypes ++ retType
+                params = case p of
+                  (ISLParam _ ISL_CTX_PTR _):ps -> ps
+                  _ -> p
+                paramTypes = concat $ map (\n -> n ++ " -> ") $ catMaybes (map (\(ISLParam _ t _) -> lookupSig t) params)
+                Just retType = lookupSig t
+        Nothing -> return ()
 
 toISLAnnotation :: Attr -> Maybe ISLAnnotation
 toISLAnnotation attr@(Attr (Ident name _ _) _ _) =
@@ -412,41 +492,105 @@ sanitizeFun (ISLFunction annotations t name params) =
 
 mustKeepFun :: ISLFunction -> Bool
 mustKeepFun (ISLFunction annots _ name _) =
-  not ((elem ISL_NULL annots) || (isSuffixOf "_free" name) || (isSuffixOf "_copy" name))
+  not ((elem ISL_NULL annots) || (isSuffixOf "_free" name) || (isSuffixOf "_copy" name) || (isSuffixOf "_get_ctx" name))
                             
-collectModules :: [String] -> ParseMonad ()
-collectModules headers = mapM_ (withParsedFile addModule) headers
-  where addModule header decls = tell [Module moduleName $ S.fromList islFuns]
-          where moduleName = moduleNameFromHeader header
-                filterFile (Ident _ _ ni, _) =
+-- collectModules :: [String] -> ParseMonad ()
+-- collectModules headers = mapM_ (withParsedFile addModule) headers
+--   where addModule header decls = tell [Module moduleName $ S.fromList islFuns]
+--           where moduleName = moduleNameFromHeader header
+--                 filterFile (Ident _ _ ni, _) =
+--                   case (fileOfNode ni) of
+--                     Nothing -> False
+--                     Just file -> (file == islDir ++ header) || file == (islDir ++ "hmap.h")
+--                 islFuns = map sanitizeFun $ filter mustKeepFun $ catMaybes $ map toISLFun $ filter filterFile $ M.toList $ gObjs decls
+
+-- writeFuns :: [ISLFunction] -> Handle -> IO ()
+-- writeFuns functions h = mapM_ writeFun functions
+--   where
+--     -- writeFun (ISLFunction _ _ name _) | trace name False = undefined
+--     writeFun f = case toCamlDeclaration f of
+--           Just str -> hPutStr h (str ++ "\n")
+--           Nothing -> return ()
+
+-- writeModule :: Module -> IO ()
+-- writeModule (Module identifier functions) =
+--   withFile moduleFileName WriteMode writeModule
+--   where writeModule h = do
+--           hPutStr h "open Ctypes\n"
+--           hPutStr h "open Foreign\n"          
+--           hPutStr h "open IslMemory\n\n"
+--           writeFuns funs h
+--         funs = S.toList functions
+--         moduleFileName = case identifier of
+--           (x:xs) -> "src/gen/in_" ++ identifier ++ ".ml"
+--           _ -> error "Empty module identifier !"
+
+moduleMap = [ ("isl_aff_", "IslAff")
+            , ("isl_constraint_", "IslConstraint")
+            , ("isl_local_space_", "IslLocalSpace")
+            , ("isl_map_", "IslMap")
+            , ("isl_id_", "IslId")
+            , ("isl_set_", "IslSet")
+            , ("isl_union_set_", "IslUnionSet")
+            , ("isl_union_map_", "IslUnionMap")
+            , ("isl_basic_set_", "IslBasicSet")
+            , ("isl_basic_map_", "IslBasicMap")
+            , ("isl_val_", "IslValue")
+            , ("isl_ctx_", "IslCtx")]
+
+sanitizeFunName :: String -> String
+sanitizeFunName name = case (M.lookup name replacements) of
+  Just repl -> repl
+  _ -> name
+  where
+    replacements = M.fromList [ ("2exp", "two_exp")
+                              , ("mod", "modulo")
+                              , ("read_from_str", "of_string")
+                              , ("to_str", "to_string")
+                              ]
+    
+
+dispatch :: String -> Maybe (String, String)
+dispatch name = case matches of
+  (x:xs) -> Just x
+  _ -> Nothing
+  where matches = catMaybes $ map tryMatch moduleMap
+        tryMatch (prefix, modName) | prefix `isPrefixOf` name =
+          Just (modName, sanitizeFunName $ drop (length prefix) name)
+        tryMatch (prefix, modName) = Nothing
+
+
+addToModule :: MLFunction -> String -> ParseMonad ()
+addToModule f name = do
+  moduleMap <- get
+  let mod = M.findWithDefault S.empty name moduleMap
+  put $ M.insert name (S.insert f mod) moduleMap
+
+addFunction :: ISLFunction -> ParseMonad ()
+addFunction f | mustKeepFun f =
+  let f'@(ISLFunction annots t name params) = sanitizeFun f in
+  case (dispatch name) of
+    Nothing -> return $ trace ("Could not dispatch: " ++ name) ()
+    Just (mlModuleName, mlFunctionName) ->
+      addToModule (MLFunction f' mlFunctionName) mlModuleName
+addFunction _ = return ()
+
+collectHeaderFunctions :: String -> ParseMonad ()
+collectHeaderFunctions header = withParsedFile addFunctions header
+  where addFunctions header decls = mapM_ addFunction islFuns
+          where filterFile (Ident _ _ ni, _) =
                   case (fileOfNode ni) of
                     Nothing -> False
                     Just file -> (file == islDir ++ header) || file == (islDir ++ "hmap.h")
-                islFuns = map sanitizeFun $ filter mustKeepFun $ catMaybes $ map toISLFun $ filter filterFile $ M.toList $ gObjs decls
+                islFuns = catMaybes $ map toISLFun $ filter filterFile $ M.toList $ gObjs decls
 
-writeFuns :: [ISLFunction] -> Handle -> IO ()
-writeFuns functions h = mapM_ writeFun functions
-  where
-    -- writeFun (ISLFunction _ _ name _) | trace name False = undefined
-    writeFun f = case toCamlDeclaration f of
-          Just str -> hPutStr h (str ++ "\n")
-          Nothing -> return ()
-
-writeModule :: Module -> IO ()
-writeModule (Module identifier functions) =
-  withFile moduleFileName WriteMode writeModule
-  where writeModule h = do
-          hPutStr h "open Ctypes\n"
-          hPutStr h "open Foreign\n"          
-          hPutStr h "open IslMemory\n\n"
-          writeFuns funs h
-        funs = S.toList functions
-        moduleFileName = case identifier of
-          (x:xs) -> "src/gen/in_" ++ identifier ++ ".ml"
-          _ -> error "Empty module identifier !"
+processModule :: (String, S.Set MLFunction) -> IO ()
+processModule (name, funs) = writeModule name $ S.toList funs
         
 main :: IO ()
 main = do
   headers <- readHeaders
-  (_,modules) <- runWriterT $ collectModules headers
-  mapM_ writeModule modules
+  modulesMap <- execStateT (mapM_ collectHeaderFunctions headers) M.empty
+  mapM_ processModule (M.toList modulesMap)
+  -- mapM_ writeModule modules
+

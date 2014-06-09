@@ -13,7 +13,7 @@ let set2 = set_read_from_str ctx
 let set3 = set_union set1 set2
 let empty = basic_set_empty (set_get_space set1)
 
-let _ = 
+let _ =
   print_endline (set_to_str set1);
   print_endline (set_to_str set2);
   print_endline (set_to_str (set_from_basic_set(set_convex_hull set3)))
