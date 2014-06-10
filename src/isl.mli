@@ -4,7 +4,7 @@ module Make :
   functor (Ctx: IslCtx.SIG) -> sig
     module Types : Types.SIG
     module Aff : (IslAff_sigs.S with module Types := Types)
-    module BasicMap : (IslBasicMap_sigs.S with module Types := Types)
+    module BasicMap : (IslBasicMap.SIG with module Types := Types)
     module BasicSet : (IslBasicSet_sigs.S with module Types := Types)
     module Constraint : (IslConstraint_sigs.S with module Types := Types)
     module Id : (IslId_sigs.S with module Types := Types)

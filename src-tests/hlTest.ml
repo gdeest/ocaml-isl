@@ -1,3 +1,4 @@
+(* Create a new module with a unique context. *)
 module IIsl = Isl.Make (struct 
   let ctx = Isl.mk_context () 
 end)
@@ -13,5 +14,5 @@ let empty_set = Set.(empty @@ get_space set)
 let _ =
   let open Set in
   print_endline @@ to_string set;
-  print_endline @@ to_string Set.(intersect set empty_set)
+  print_endline @@ to_string Set.(intersect set empty_set);
 

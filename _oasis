@@ -27,8 +27,8 @@ Library "isl"
   BuildDepends: ctypes, ctypes.foreign, isl.core
   CompiledObject: native
   FindlibName: isl
-  Modules: Isl, gen/IslAff_sigs, gen/IslBasicMap_sigs, gen/IslBasicSet_sigs, gen/IslConstraint_sigs, gen/IslId_sigs, gen/IslLocalSpace_sigs, gen/IslMap_sigs, gen/IslSet_sigs, gen/IslUnionMap_sigs, gen/IslUnionSet_sigs, gen/IslValue_sigs
-  InternalModules: gen/IslAff, gen/IslBasicMap, gen/IslBasicSet, gen/IslConstraint, gen/IslId, gen/IslLocalSpace, gen/IslMap, gen/IslSet, gen/IslUnionMap, gen/IslUnionSet, gen/IslValue
+  Modules: Isl, IslBasicMap, gen/IslAff_sigs, gen/IslBasicMap_sigs, gen/IslBasicSet_sigs, gen/IslConstraint_sigs, gen/IslId_sigs, gen/IslLocalSpace_sigs, gen/IslMap_sigs, gen/IslSet_sigs, gen/IslUnionMap_sigs, gen/IslUnionSet_sigs, gen/IslValue_sigs
+  InternalModules: gen/IslAff_In, gen/IslBasicMap_In, gen/IslBasicSet_In, gen/IslConstraint_In, gen/IslId_In, gen/IslLocalSpace_In, gen/IslMap_In, gen/IslSet_In, gen/IslUnionMap_In, gen/IslUnionSet_In, gen/IslValue_In
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
   CCLib: -L/usr/local/lib -lisl
 
@@ -38,7 +38,7 @@ Document doc
   Type: ocamlbuild (0.3)
   BuildTools: ocamldoc, ocamlbuild
   XOCamlbuildPath: .
-  XOCamlbuildLibraries: isl.core, isl
+  XOCamlbuildLibraries: isl
 
 # # Executable setops
 # #   Install: false

@@ -244,31 +244,31 @@ writeModule :: String -> [MLFunction] -> IO ()
 writeModule name functions =
   let (x:xs) = name in
   let name' = (toLower x):xs in
-  withFile ("src/core/"++name'++"_Core.ml") WriteMode $ \inh -> do
-    hPutStrLn inh "open Types"
-    hPutStrLn inh "open Ctypes"
-    hPutStrLn inh "open Foreign"
-    hPutStrLn inh "open IslMemory"
-    hPutStrLn inh "open IslErrors"    
-    hPutStrLn inh ""
+  withFile ("src/core/"++name'++"_Core.ml") WriteMode $ \coreh -> do
+    hPutStrLn coreh "open Types"
+    hPutStrLn coreh "open Ctypes"
+    hPutStrLn coreh "open Foreign"
+    hPutStrLn coreh "open IslMemory"
+    hPutStrLn coreh "open IslErrors"    
+    hPutStrLn coreh ""
     withFile ("src/gen/"++name'++"_sigs.ml") WriteMode $ \sigh -> do
       hPutStrLn sigh "open Types\n"
       hPutStrLn sigh "module type S = sig"
       hPutStrLn sigh "    module Types : Types.SIG"
-      withFile ("src/gen/"++name'++".ml") WriteMode$ \h -> do
+      withFile ("src/gen/"++name'++"_In.ml") WriteMode$ \h -> do
         hPutStrLn h $ "open " ++ name ++ "_Core\n"
         hPutStrLn h $ "module Make (Ctx: IslCtx.SIG): "++name++"_sigs.S with module Types := Types = struct"
         hPutStrLn h "    module Types = Types"
         hPutStrLn h ""
-        mapM_ (writeFunction inh sigh h) functions
+        mapM_ (writeFunction coreh sigh h) functions
         hPutStrLn h "end"
       hPutStrLn sigh "end"
   where
-    writeFunction inh sigh h f@(MLFunction (ISLFunction _ t _ p) name) = do
+    writeFunction coreh sigh h f@(MLFunction (ISLFunction _ t _ p) name) = do
       let inDecl = toInDecl f
       case inDecl of
         Just d -> do
-          hPutStrLn inh d
+          hPutStrLn coreh d
           hPutStrLn sigh $ "    val "++name++ " : " ++ sig
           hPutStrLn h $ "    let " ++ name ++ " = " ++ name ++ " Ctx.ctx"
           where sig = paramTypes ++ retType
