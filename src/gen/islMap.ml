@@ -1,5 +1,6 @@
-open In_IslMap
-module Make (Ctx: Sig_Context.S): Sig_IslMap.S with module Types = Types = struct
+open IslMap_Core
+
+module Make (Ctx: IslCtx.SIG): IslMap_sigs.S with module Types := Types = struct
     module Types = Types
 
     let find_dim_by_id = find_dim_by_id Ctx.ctx

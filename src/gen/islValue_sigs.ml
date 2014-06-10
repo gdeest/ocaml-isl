@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val sgn : Types.value -> int
     val dump : Types.value -> unit
     val eq : Types.value -> Types.value -> bool

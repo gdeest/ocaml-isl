@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val dump : Types.id -> unit
     val get_name : Types.id -> string
 end

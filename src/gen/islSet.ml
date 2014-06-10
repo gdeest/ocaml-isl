@@ -1,5 +1,6 @@
-open In_IslSet
-module Make (Ctx: Sig_Context.S): Sig_IslSet.S with module Types = Types = struct
+open IslSet_Core
+
+module Make (Ctx: IslCtx.SIG): IslSet_sigs.S with module Types := Types = struct
     module Types = Types
 
     let find_dim_by_id = find_dim_by_id Ctx.ctx

@@ -6,29 +6,53 @@ Authors:     G. Deest
 License:     MIT
 Plugins:     DevFiles (0.4), META (0.4)
 
+Library "isl_core"
+  Path:		src/core
+  BuildTools:	ocamlbuild
+  BuildDepends:	ctypes, ctypes.foreign
+  FindlibParent: isl
+  FindlibName:	core
+  Modules:	IslMemory, IslErrors, Types, IslCtx, IslAff_Core, IslBasicMap_Core, IslBasicSet_Core, IslConstraint_Core, IslId_Core, IslLocalSpace_Core, IslMap_Core, IslSet_Core, IslUnionMap_Core, IslUnionSet_Core, IslValue_Core
+
+# Library "isl"
+#   Path:		src/isl
+#   BuildTools:	ocamlbuild
+#   BuildDepends:	isl.core
+#   FindlibName:	isl
+#   Modules:	Main
+
 Library "isl"
   Path:            src/
   BuildTools:      ocamlbuild
-  BuildDepends: ctypes, ctypes.foreign
+  BuildDepends: ctypes, ctypes.foreign, isl.core
   CompiledObject: native
   FindlibName: isl
-  Modules: Isl, sigs/Sig_Context, Ctx, Errors, Types, IslMemory, sigs/Sig_Types, gen/In_IslAff, gen/In_IslBasicMap, gen/In_IslBasicSet, gen/In_IslConstraint, gen/In_IslId, gen/In_IslLocalSpace, gen/In_IslMap, gen/In_IslSet, gen/In_IslUnionMap, gen/In_IslUnionSet, gen/In_IslValue, gen/IslAff, gen/IslBasicMap, gen/IslBasicSet, gen/IslConstraint, gen/IslId, gen/IslLocalSpace, gen/IslMap, gen/IslSet, gen/IslUnionMap, gen/IslUnionSet, gen/IslValue, gen/sigs/Sig_IslAff, gen/sigs/Sig_IslBasicMap, gen/sigs/Sig_IslBasicSet, gen/sigs/Sig_IslConstraint, gen/sigs/Sig_IslId, gen/sigs/Sig_IslLocalSpace, gen/sigs/Sig_IslMap, gen/sigs/Sig_IslSet, gen/sigs/Sig_IslUnionMap, gen/sigs/Sig_IslUnionSet, gen/sigs/Sig_IslValue
+  Modules: Isl, gen/IslAff_sigs, gen/IslBasicMap_sigs, gen/IslBasicSet_sigs, gen/IslConstraint_sigs, gen/IslId_sigs, gen/IslLocalSpace_sigs, gen/IslMap_sigs, gen/IslSet_sigs, gen/IslUnionMap_sigs, gen/IslUnionSet_sigs, gen/IslValue_sigs
+  InternalModules: gen/IslAff, gen/IslBasicMap, gen/IslBasicSet, gen/IslConstraint, gen/IslId, gen/IslLocalSpace, gen/IslMap, gen/IslSet, gen/IslUnionMap, gen/IslUnionSet, gen/IslValue
   CCOpt: -cclib,-Xlinker,-cclib,-no-as-needed,-Wl
   CCLib: -L/usr/local/lib -lisl
 
-# Executable setops
-#   Install: false
-#   Path:       src-tests
-#   Build$: flag(tests)
-#   BuildDepends: isl
-#   BuildTools: ocamlbuild
-#   CompiledObject: native
-#   MainIs:     setops.ml
+Document doc
+  Install: false
+  Title: API Document for Impulsive
+  Type: ocamlbuild (0.3)
+  BuildTools: ocamldoc, ocamlbuild
+  XOCamlbuildPath: .
+  XOCamlbuildLibraries: isl.core, isl
+
+# # Executable setops
+# #   Install: false
+# #   Path:       src-tests
+# #   Build$: flag(tests)
+# #   BuildDepends: isl
+# #   BuildTools: ocamlbuild
+# #   CompiledObject: native
+# #   MainIs:     setops.ml
  
-# Test "Set operations"
-#   Type: Custom (0.0.1)
-#   Command: $setops
-#   WorkingDirectory: /tmp
+# # Test "Set operations"
+# #   Type: Custom (0.0.1)
+# #   Command: $setops
+# #   WorkingDirectory: /tmp
 
 Executable hl
   Install: false

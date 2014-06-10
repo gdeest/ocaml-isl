@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val find_dim_by_id : Types.set -> dim_type -> Types.id -> int
     val find_dim_by_name : Types.set -> dim_type -> string -> int
     val follows_at : Types.set -> Types.set -> int -> int

@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val n_map : Types.union_map -> int
     val dump : Types.union_map -> unit
     val plain_is_injective : Types.union_map -> bool

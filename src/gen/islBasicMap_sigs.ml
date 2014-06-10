@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val empty_like : Types.basic_map -> Types.basic_map
     val empty_like_map : Types.map -> Types.basic_map
     val finalize : Types.basic_map -> Types.basic_map

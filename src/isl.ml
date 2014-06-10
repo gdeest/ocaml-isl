@@ -1,4 +1,6 @@
-module Make (Ctx: Sig_Context.S) = struct
+let mk_context = IslCtx.create
+
+module Make (Ctx: IslCtx.SIG) = struct
   module Types = Types
   module Aff = IslAff.Make (Ctx)
   module BasicMap = IslBasicMap.Make (Ctx)

@@ -2,5 +2,5 @@ open Types
 open Ctypes
 open Foreign
 open IslMemory
-open Errors
+open IslErrors
 

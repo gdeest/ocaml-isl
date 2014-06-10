@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val find_dim_by_id : Types.map -> dim_type -> Types.id -> int
     val find_dim_by_name : Types.map -> dim_type -> string -> int
     val dup : Types.map -> Types.map

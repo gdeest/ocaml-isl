@@ -1,11 +1,14 @@
 PKG ctypes
 PKG ctypes.foreign
 PKG cil
-S src/
-S src/sigs
+PKG isl
+PKG isl.core
+S src
+S src/core
 S src/gen
-S src/gen/sigs
-S src/tests/
+S src-tests
 
 B _build/src
-B _build/src/tests
+B _build/src/core
+B _build/src/gen
+B _build/src-tests

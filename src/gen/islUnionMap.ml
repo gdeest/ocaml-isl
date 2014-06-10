@@ -1,5 +1,6 @@
-open In_IslUnionMap
-module Make (Ctx: Sig_Context.S): Sig_IslUnionMap.S with module Types = Types = struct
+open IslUnionMap_Core
+
+module Make (Ctx: IslCtx.SIG): IslUnionMap_sigs.S with module Types := Types = struct
     module Types = Types
 
     let n_map = n_map Ctx.ctx

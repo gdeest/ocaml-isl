@@ -1,5 +1,6 @@
-open In_IslBasicMap
-module Make (Ctx: Sig_Context.S): Sig_IslBasicMap.S with module Types = Types = struct
+open IslBasicMap_Core
+
+module Make (Ctx: IslCtx.SIG): IslBasicMap_sigs.S with module Types := Types = struct
     module Types = Types
 
     let empty_like = empty_like Ctx.ctx

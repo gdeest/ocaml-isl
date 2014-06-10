@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val n_set : Types.union_set -> int
     val dump : Types.union_set -> unit
     val is_params : Types.union_set -> bool

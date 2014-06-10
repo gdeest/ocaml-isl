@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val compare_at : Types.basic_set -> Types.basic_set -> int -> int
     val n_constraint : Types.basic_set -> int
     val compute_divs : Types.basic_set -> Types.set

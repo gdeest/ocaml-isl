@@ -155,7 +155,7 @@ moduleNameFromHeader header = camelize (reverse $ drop 2 $ reverse header)
 mlTypes :: M.Map ISLType String
 mlTypes = M.fromList [ (VOID, "void")
                      , (INT, "int")
-                     , (ISL_CTX_PTR, "Ctx.t")
+                     , (ISL_CTX_PTR, "Types.ctx")
                      , (ISL_SET_PTR, "Types.set")
                      , (ISL_BASIC_SET_PTR, "Types.basic_set")
                      , (ISL_UNION_SET_PTR, "Types.union_set")
@@ -190,8 +190,8 @@ toCamlDeclaration (ISLFunction annots t name params) = do
   wrappedParams <- fmap concat (sequence $ map wrapParam params)
   retWrap <- gcWrap
   let paramPart = concat (intersperse " @-> " mlParamTypes)
-  let cFun = "    let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ") in\n"
-  return $ header ++ wrappedParams ++ cFun ++ cFunCall ++ retWrap ++ "    ret\n"
+  let cFun = "let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ")\n"
+  return $ cFun ++ header ++ wrappedParams ++ cFun ++ cFunCall ++ retWrap ++ "    ret\n"
   where header = "let " ++ funName ++ " " ++ paramList ++ " = \n"
         funName = if isPrefixOf "isl_" name then drop 4 name else name
         wrapParam (ISLParam annots t name) =
@@ -217,8 +217,8 @@ toInDecl (MLFunction (ISLFunction annots t name params) mlName) = do
   wrappedParams <- fmap concat (sequence $ map wrapParam params)
   retWrap <- gcWrap
   let paramPart = concat (intersperse " @-> " mlParamTypes)
-  let cFun = "    let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ") in\n"
-  return $ header ++ wrappedParams ++ cFun ++ cFunCall ++ "    check_for_errors ctx;\n" ++ retWrap ++"    ret\n"
+  let cFun = "let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ")\n"
+  return $ cFun ++ header ++ wrappedParams ++ cFunCall ++ "    check_for_errors ctx;\n" ++ retWrap ++"    ret\n"
   where header = "let " ++ mlName ++ " " ++ mlParamList ++ " = \n"
         funName = if isPrefixOf "isl_" name then drop 4 name else name
         wrapParam (ISLParam annots t name) =
@@ -242,21 +242,22 @@ toDecl f = Just "Outside Decl"
 
 writeModule :: String -> [MLFunction] -> IO ()
 writeModule name functions =
-  withFile ("src/gen/in_"++name++".ml") WriteMode $ \inh -> do
+  let (x:xs) = name in
+  let name' = (toLower x):xs in
+  withFile ("src/core/"++name'++"_Core.ml") WriteMode $ \inh -> do
     hPutStrLn inh "open Types"
     hPutStrLn inh "open Ctypes"
     hPutStrLn inh "open Foreign"
     hPutStrLn inh "open IslMemory"
-    hPutStrLn inh "open Errors"    
+    hPutStrLn inh "open IslErrors"    
     hPutStrLn inh ""
-    withFile ("src/gen/sigs/sig_"++name++".ml") WriteMode $ \sigh -> do
+    withFile ("src/gen/"++name'++"_sigs.ml") WriteMode $ \sigh -> do
       hPutStrLn sigh "open Types\n"
       hPutStrLn sigh "module type S = sig"
-      hPutStrLn sigh "    module Types : Sig_Types.S"
-      let (x:xs) = name      
-      withFile ("src/gen/"++((toLower x):xs)++".ml") WriteMode$ \h -> do
-        hPutStrLn h $ "open In_" ++ name
-        hPutStrLn h $ "module Make (Ctx: Sig_Context.S): Sig_"++name++".S with module Types = Types = struct"
+      hPutStrLn sigh "    module Types : Types.SIG"
+      withFile ("src/gen/"++name'++".ml") WriteMode$ \h -> do
+        hPutStrLn h $ "open " ++ name ++ "_Core\n"
+        hPutStrLn h $ "module Make (Ctx: IslCtx.SIG): "++name++"_sigs.S with module Types := Types = struct"
         hPutStrLn h "    module Types = Types"
         hPutStrLn h ""
         mapM_ (writeFunction inh sigh h) functions

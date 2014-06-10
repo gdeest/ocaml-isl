@@ -1,20 +1,17 @@
-module Ctx : Sig_Context.S = struct
-  let ctx = Ctx.create ()
-end
-
-module IIsl = Isl.Make (Ctx)
+module IIsl = Isl.Make (struct 
+  let ctx = Isl.mk_context () 
+end)
 
 open IIsl
 
-let set1 = Set.of_string "{ [x, y] : x >= 1 and x <= 5 and y >= 1 }"
-let set2 = Set.of_string "{ [x, y] : x >= 0 and x <= 4 and y >= 0 and y <= 3 + x }"
+let bset = BasicSet.of_string "{ [x, y] : x >= 1 and x <= 5 and y >= 1 }"
+let bmap = BasicMap.(intersect_domain (of_string "{ [x, y] -> [i, j] }") bset)
 
-let set3 = Set.union set1 set2
-let empty = BasicSet.empty (Set.get_space set1)
+let set = Set.from_basic_set bset
+let empty_set = Set.(empty @@ get_space set)
 
 let _ =
   let open Set in
-  print_endline @@ to_string set1;
-  print_endline @@ to_string set2;
-  print_endline @@ to_string @@ from_basic_set @@ convex_hull set1
+  print_endline @@ to_string set;
+  print_endline @@ to_string Set.(intersect set empty_set)
 

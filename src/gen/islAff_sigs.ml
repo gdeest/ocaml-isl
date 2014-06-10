@@ -1,7 +1,7 @@
 open Types
 
 module type S = sig
-    module Types : Sig_Types.S
+    module Types : Types.SIG
     val dim : Types.aff -> dim_type -> int
     val dump : Types.aff -> unit
     val is_cst : Types.aff -> bool
