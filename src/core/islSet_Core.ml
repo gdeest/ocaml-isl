@@ -3,6 +3,7 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_set_find_dim_by_id = foreign "isl_set_find_dim_by_id" (Types.set @-> dim_type @-> Types.id @-> returning int)
 let find_dim_by_id ctx set typ id = 
@@ -19,6 +20,12 @@ let find_dim_by_name ctx set typ name =
 let isl_set_follows_at = foreign "isl_set_follows_at" (Types.set @-> Types.set @-> int @-> returning int)
 let follows_at ctx set1 set2 pos = 
     let ret = isl_set_follows_at set1 set2 pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_involves_dims = foreign "isl_set_involves_dims" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning int)
+let involves_dims ctx set typ first n = 
+    let ret = isl_set_involves_dims set typ first n in
     check_for_errors ctx;
     ret
 
@@ -40,6 +47,30 @@ let size ctx set =
     check_for_errors ctx;
     ret
 
+let isl_set_dim = foreign "isl_set_dim" (Types.set @-> dim_type @-> returning unsigned_int)
+let dim ctx set typ = 
+    let ret = isl_set_dim set typ in
+    check_for_errors ctx;
+    ret
+
+let isl_set_n_dim = foreign "isl_set_n_dim" (Types.set @-> returning unsigned_int)
+let n_dim ctx set = 
+    let ret = isl_set_n_dim set in
+    check_for_errors ctx;
+    ret
+
+let isl_set_n_param = foreign "isl_set_n_param" (Types.set @-> returning unsigned_int)
+let n_param ctx set = 
+    let ret = isl_set_n_param set in
+    check_for_errors ctx;
+    ret
+
+let isl_set_alloc = foreign "isl_set_alloc" (Types.ctx @-> unsigned_int @-> unsigned_int @-> int @-> unsigned_int @-> returning Types.set)
+let alloc ctx nparam dim n flags = 
+    let ret = isl_set_alloc ctx nparam dim n flags in
+    check_for_errors ctx;
+    ret
+
 let isl_set_drop_basic_set = foreign "isl_set_drop_basic_set" (Types.set @-> Types.basic_set @-> returning Types.set)
 let drop_basic_set ctx set bset = 
     let ret = isl_set_drop_basic_set set bset in
@@ -52,15 +83,33 @@ let dup ctx set =
     check_for_errors ctx;
     ret
 
+let isl_set_eliminate_dims = foreign "isl_set_eliminate_dims" (Types.set @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let eliminate_dims ctx set first n = 
+    let ret = isl_set_eliminate_dims set first n in
+    check_for_errors ctx;
+    ret
+
 let isl_set_empty_like = foreign "isl_set_empty_like" (Types.set @-> returning Types.set)
 let empty_like ctx set = 
     let ret = isl_set_empty_like set in
     check_for_errors ctx;
     ret
 
+let isl_set_extend = foreign "isl_set_extend" (Types.set @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let extend ctx base nparam dim = 
+    let ret = isl_set_extend base nparam dim in
+    check_for_errors ctx;
+    ret
+
 let isl_set_finalize = foreign "isl_set_finalize" (Types.set @-> returning Types.set)
 let finalize ctx set = 
     let ret = isl_set_finalize set in
+    check_for_errors ctx;
+    ret
+
+let isl_set_fix_dim_si = foreign "isl_set_fix_dim_si" (Types.set @-> unsigned_int @-> int @-> returning Types.set)
+let fix_dim_si ctx set dim value = 
+    let ret = isl_set_fix_dim_si set dim value in
     check_for_errors ctx;
     ret
 
@@ -106,9 +155,51 @@ let dump ctx set =
     check_for_errors ctx;
     ret
 
+let isl_set_get_dim_name = foreign "isl_set_get_dim_name" (Types.set @-> dim_type @-> unsigned_int @-> returning string)
+let get_dim_name ctx set typ pos = 
+    let ret = isl_set_get_dim_name set typ pos in
+    check_for_errors ctx;
+    ret
+
 let isl_set_get_tuple_name = foreign "isl_set_get_tuple_name" (Types.set @-> returning string)
 let get_tuple_name ctx set = 
     let ret = isl_set_get_tuple_name set in
+    check_for_errors ctx;
+    ret
+
+let isl_set_dim_has_any_lower_bound = foreign "isl_set_dim_has_any_lower_bound" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let dim_has_any_lower_bound ctx set typ pos = 
+    let ret = isl_set_dim_has_any_lower_bound set typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_dim_has_any_upper_bound = foreign "isl_set_dim_has_any_upper_bound" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let dim_has_any_upper_bound ctx set typ pos = 
+    let ret = isl_set_dim_has_any_upper_bound set typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_dim_has_lower_bound = foreign "isl_set_dim_has_lower_bound" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let dim_has_lower_bound ctx set typ pos = 
+    let ret = isl_set_dim_has_lower_bound set typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_dim_has_upper_bound = foreign "isl_set_dim_has_upper_bound" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let dim_has_upper_bound ctx set typ pos = 
+    let ret = isl_set_dim_has_upper_bound set typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_dim_is_bounded = foreign "isl_set_dim_is_bounded" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let dim_is_bounded ctx set typ pos = 
+    let ret = isl_set_dim_is_bounded set typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_dim_is_unique = foreign "isl_set_dim_is_unique" (Types.set @-> unsigned_int @-> returning bool)
+let dim_is_unique ctx set dim = 
+    let ret = isl_set_dim_is_unique set dim in
     check_for_errors ctx;
     ret
 
@@ -133,6 +224,18 @@ let fast_is_equal ctx set1 set2 =
 let isl_set_fast_is_universe = foreign "isl_set_fast_is_universe" (Types.set @-> returning bool)
 let fast_is_universe ctx set = 
     let ret = isl_set_fast_is_universe set in
+    check_for_errors ctx;
+    ret
+
+let isl_set_has_dim_id = foreign "isl_set_has_dim_id" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let has_dim_id ctx set typ pos = 
+    let ret = isl_set_has_dim_id set typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_set_has_dim_name = foreign "isl_set_has_dim_name" (Types.set @-> dim_type @-> unsigned_int @-> returning bool)
+let has_dim_name ctx set typ pos = 
+    let ret = isl_set_has_dim_name set typ pos in
     check_for_errors ctx;
     ret
 
@@ -211,6 +314,22 @@ let add_basic_set ctx set bset =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_add_constraint = foreign "isl_set_add_constraint" (Types.set @-> Types.constrnt @-> returning Types.set)
+let add_constraint ctx set constrnt = 
+    let set = set_copy set in
+    let ret = isl_set_add_constraint set constrnt in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_add_dims = foreign "isl_set_add_dims" (Types.set @-> dim_type @-> unsigned_int @-> returning Types.set)
+let add_dims ctx set typ n = 
+    let set = set_copy set in
+    let ret = isl_set_add_dims set typ n in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_align_divs = foreign "isl_set_align_divs" (Types.set @-> returning Types.set)
 let align_divs ctx set = 
     let set = set_copy set in
@@ -236,6 +355,22 @@ let compute_divs ctx set =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_drop_constraints_involving_dims = foreign "isl_set_drop_constraints_involving_dims" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let drop_constraints_involving_dims ctx set typ first n = 
+    let set = set_copy set in
+    let ret = isl_set_drop_constraints_involving_dims set typ first n in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_eliminate = foreign "isl_set_eliminate" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let eliminate ctx set typ first n = 
+    let set = set_copy set in
+    let ret = isl_set_eliminate set typ first n in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_empty = foreign "isl_set_empty" (Types.space @-> returning Types.set)
 let empty ctx dim = 
     let dim = space_copy dim in
@@ -248,6 +383,23 @@ let isl_set_equate = foreign "isl_set_equate" (Types.set @-> dim_type @-> int @-
 let equate ctx set type1 pos1 type2 pos2 = 
     let set = set_copy set in
     let ret = isl_set_equate set type1 pos1 type2 pos2 in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_fix_si = foreign "isl_set_fix_si" (Types.set @-> dim_type @-> unsigned_int @-> int @-> returning Types.set)
+let fix_si ctx set typ pos value = 
+    let set = set_copy set in
+    let ret = isl_set_fix_si set typ pos value in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_fix_val = foreign "isl_set_fix_val" (Types.set @-> dim_type @-> unsigned_int @-> Types.value @-> returning Types.set)
+let fix_val ctx set typ pos v = 
+    let set = set_copy set in
+    let v = val_copy v in
+    let ret = isl_set_fix_val set typ pos v in
     check_for_errors ctx;
     Gc.finalise set_free ret;
     ret
@@ -295,6 +447,14 @@ let gist_params ctx set context =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_insert_dims = foreign "isl_set_insert_dims" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let insert_dims ctx set typ pos n = 
+    let set = set_copy set in
+    let ret = isl_set_insert_dims set typ pos n in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_lift = foreign "isl_set_lift" (Types.set @-> returning Types.set)
 let lift ctx set = 
     let set = set_copy set in
@@ -303,10 +463,35 @@ let lift ctx set =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_lower_bound_si = foreign "isl_set_lower_bound_si" (Types.set @-> dim_type @-> unsigned_int @-> int @-> returning Types.set)
+let lower_bound_si ctx set typ pos value = 
+    let set = set_copy set in
+    let ret = isl_set_lower_bound_si set typ pos value in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_lower_bound_val = foreign "isl_set_lower_bound_val" (Types.set @-> dim_type @-> unsigned_int @-> Types.value @-> returning Types.set)
+let lower_bound_val ctx set typ pos value = 
+    let set = set_copy set in
+    let value = val_copy value in
+    let ret = isl_set_lower_bound_val set typ pos value in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_make_disjoint = foreign "isl_set_make_disjoint" (Types.set @-> returning Types.set)
 let make_disjoint ctx set = 
     let set = set_copy set in
     let ret = isl_set_make_disjoint set in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_move_dims = foreign "isl_set_move_dims" (Types.set @-> dim_type @-> unsigned_int @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let move_dims ctx set dst_type dst_pos src_type src_pos n = 
+    let set = set_copy set in
+    let ret = isl_set_move_dims set dst_type dst_pos src_type src_pos n in
     check_for_errors ctx;
     Gc.finalise set_free ret;
     ret
@@ -344,6 +529,14 @@ let product ctx set1 set2 =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_project_out = foreign "isl_set_project_out" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let project_out ctx set typ first n = 
+    let set = set_copy set in
+    let ret = isl_set_project_out set typ first n in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_recession_cone = foreign "isl_set_recession_cone" (Types.set @-> returning Types.set)
 let recession_cone ctx set = 
     let set = set_copy set in
@@ -352,10 +545,26 @@ let recession_cone ctx set =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_remove_dims = foreign "isl_set_remove_dims" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let remove_dims ctx bset typ first n = 
+    let bset = set_copy bset in
+    let ret = isl_set_remove_dims bset typ first n in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_remove_divs = foreign "isl_set_remove_divs" (Types.set @-> returning Types.set)
 let remove_divs ctx set = 
     let set = set_copy set in
     let ret = isl_set_remove_divs set in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_remove_divs_involving_dims = foreign "isl_set_remove_divs_involving_dims" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let remove_divs_involving_dims ctx set typ first n = 
+    let set = set_copy set in
+    let ret = isl_set_remove_divs_involving_dims set typ first n in
     check_for_errors ctx;
     Gc.finalise set_free ret;
     ret
@@ -401,6 +610,23 @@ let reset_user ctx set =
     Gc.finalise set_free ret;
     ret
 
+let isl_set_set_dim_id = foreign "isl_set_set_dim_id" (Types.set @-> dim_type @-> unsigned_int @-> Types.id @-> returning Types.set)
+let set_dim_id ctx set typ pos id = 
+    let set = set_copy set in
+    let id = id_copy id in
+    let ret = isl_set_set_dim_id set typ pos id in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_set_dim_name = foreign "isl_set_set_dim_name" (Types.set @-> dim_type @-> unsigned_int @-> string @-> returning Types.set)
+let set_dim_name ctx set typ pos s = 
+    let set = set_copy set in
+    let ret = isl_set_set_dim_name set typ pos s in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
 let isl_set_set_tuple_id = foreign "isl_set_set_tuple_id" (Types.set @-> Types.id @-> returning Types.set)
 let set_tuple_id ctx set id = 
     let set = set_copy set in
@@ -414,6 +640,14 @@ let isl_set_set_tuple_name = foreign "isl_set_set_tuple_name" (Types.set @-> str
 let set_tuple_name ctx set s = 
     let set = set_copy set in
     let ret = isl_set_set_tuple_name set s in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_split_dims = foreign "isl_set_split_dims" (Types.set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.set)
+let split_dims ctx set typ first n = 
+    let set = set_copy set in
+    let ret = isl_set_split_dims set typ first n in
     check_for_errors ctx;
     Gc.finalise set_free ret;
     ret
@@ -438,6 +672,23 @@ let universe ctx dim =
 let isl_set_universe_like = foreign "isl_set_universe_like" (Types.set @-> returning Types.set)
 let universe_like ctx model = 
     let ret = isl_set_universe_like model in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_upper_bound_si = foreign "isl_set_upper_bound_si" (Types.set @-> dim_type @-> unsigned_int @-> int @-> returning Types.set)
+let upper_bound_si ctx set typ pos value = 
+    let set = set_copy set in
+    let ret = isl_set_upper_bound_si set typ pos value in
+    check_for_errors ctx;
+    Gc.finalise set_free ret;
+    ret
+
+let isl_set_upper_bound_val = foreign "isl_set_upper_bound_val" (Types.set @-> dim_type @-> unsigned_int @-> Types.value @-> returning Types.set)
+let upper_bound_val ctx set typ pos value = 
+    let set = set_copy set in
+    let value = val_copy value in
+    let ret = isl_set_upper_bound_val set typ pos value in
     check_for_errors ctx;
     Gc.finalise set_free ret;
     ret
@@ -568,6 +819,20 @@ let min_val ctx set obj =
     let ret = isl_set_min_val set obj in
     check_for_errors ctx;
     Gc.finalise val_free ret;
+    ret
+
+let isl_set_plain_get_val_if_fixed = foreign "isl_set_plain_get_val_if_fixed" (Types.set @-> dim_type @-> unsigned_int @-> returning Types.value)
+let plain_get_val_if_fixed ctx set typ pos = 
+    let ret = isl_set_plain_get_val_if_fixed set typ pos in
+    check_for_errors ctx;
+    Gc.finalise val_free ret;
+    ret
+
+let isl_set_get_dim_id = foreign "isl_set_get_dim_id" (Types.set @-> dim_type @-> unsigned_int @-> returning Types.id)
+let get_dim_id ctx set typ pos = 
+    let ret = isl_set_get_dim_id set typ pos in
+    check_for_errors ctx;
+    Gc.finalise id_free ret;
     ret
 
 let isl_set_get_tuple_id = foreign "isl_set_get_tuple_id" (Types.set @-> returning Types.id)

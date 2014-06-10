@@ -11,6 +11,7 @@ module type SIG = sig
   type aff
   type value
   type local_space
+  type constrnt
   type id
 end
 
@@ -50,6 +51,9 @@ val local_space : local_space typ
 type id
 val id : id typ
 
+type constrnt
+val constrnt : constrnt typ
+
 type dim_type = DimCst | DimParam | DimIn | DimOut | DimSet | DimDiv | DimAll
 
 val int_of_dim_type : dim_type -> int
@@ -70,3 +74,5 @@ type isl_error =
 
 exception Isl_exception of isl_error
 
+type unsigned_int = int
+val unsigned_int : int typ

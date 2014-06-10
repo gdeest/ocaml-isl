@@ -3,6 +3,7 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_aff_dim = foreign "isl_aff_dim" (Types.aff @-> dim_type @-> returning int)
 let dim ctx aff typ = 
@@ -10,9 +11,21 @@ let dim ctx aff typ =
     check_for_errors ctx;
     ret
 
+let isl_aff_involves_dims = foreign "isl_aff_involves_dims" (Types.aff @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning int)
+let involves_dims ctx aff typ first n = 
+    let ret = isl_aff_involves_dims aff typ first n in
+    check_for_errors ctx;
+    ret
+
 let isl_aff_dump = foreign "isl_aff_dump" (Types.aff @-> returning void)
 let dump ctx aff = 
     let ret = isl_aff_dump aff in
+    check_for_errors ctx;
+    ret
+
+let isl_aff_get_dim_name = foreign "isl_aff_get_dim_name" (Types.aff @-> dim_type @-> unsigned_int @-> returning string)
+let get_dim_name ctx aff typ pos = 
+    let ret = isl_aff_get_dim_name aff typ pos in
     check_for_errors ctx;
     ret
 
@@ -160,6 +173,14 @@ let add_constant_val ctx aff v =
     Gc.finalise aff_free ret;
     ret
 
+let isl_aff_add_dims = foreign "isl_aff_add_dims" (Types.aff @-> dim_type @-> unsigned_int @-> returning Types.aff)
+let add_dims ctx aff typ n = 
+    let aff = aff_copy aff in
+    let ret = isl_aff_add_dims aff typ n in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
 let isl_aff_align_params = foreign "isl_aff_align_params" (Types.aff @-> Types.space @-> returning Types.aff)
 let align_params ctx aff model = 
     let aff = aff_copy aff in
@@ -182,6 +203,14 @@ let div ctx aff1 aff2 =
     let aff1 = aff_copy aff1 in
     let aff2 = aff_copy aff2 in
     let ret = isl_aff_div aff1 aff2 in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
+let isl_aff_drop_dims = foreign "isl_aff_drop_dims" (Types.aff @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.aff)
+let drop_dims ctx aff typ first n = 
+    let aff = aff_copy aff in
+    let ret = isl_aff_drop_dims aff typ first n in
     check_for_errors ctx;
     Gc.finalise aff_free ret;
     ret
@@ -219,10 +248,26 @@ let gist_params ctx aff context =
     Gc.finalise aff_free ret;
     ret
 
+let isl_aff_insert_dims = foreign "isl_aff_insert_dims" (Types.aff @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.aff)
+let insert_dims ctx aff typ first n = 
+    let aff = aff_copy aff in
+    let ret = isl_aff_insert_dims aff typ first n in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
 let isl_aff_mod_val = foreign "isl_aff_mod_val" (Types.aff @-> Types.value @-> returning Types.aff)
 let mod_val ctx aff modulo = 
     let aff = aff_copy aff in
     let ret = isl_aff_mod_val aff modulo in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
+let isl_aff_move_dims = foreign "isl_aff_move_dims" (Types.aff @-> dim_type @-> unsigned_int @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.aff)
+let move_dims ctx aff dst_type dst_pos src_type src_pos n = 
+    let aff = aff_copy aff in
+    let ret = isl_aff_move_dims aff dst_type dst_pos src_type src_pos n in
     check_for_errors ctx;
     Gc.finalise aff_free ret;
     ret
@@ -272,6 +317,14 @@ let pullback_aff ctx aff1 aff2 =
 let isl_aff_read_from_str = foreign "isl_aff_read_from_str" (Types.ctx @-> string @-> returning Types.aff)
 let of_string ctx str = 
     let ret = isl_aff_read_from_str ctx str in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
+let isl_aff_scale_down_ui = foreign "isl_aff_scale_down_ui" (Types.aff @-> unsigned_int @-> returning Types.aff)
+let scale_down_ui ctx aff f = 
+    let aff = aff_copy aff in
+    let ret = isl_aff_scale_down_ui aff f in
     check_for_errors ctx;
     Gc.finalise aff_free ret;
     ret
@@ -328,6 +381,23 @@ let set_constant_val ctx aff v =
     Gc.finalise aff_free ret;
     ret
 
+let isl_aff_set_dim_id = foreign "isl_aff_set_dim_id" (Types.aff @-> dim_type @-> unsigned_int @-> Types.id @-> returning Types.aff)
+let set_dim_id ctx aff typ pos id = 
+    let aff = aff_copy aff in
+    let id = id_copy id in
+    let ret = isl_aff_set_dim_id aff typ pos id in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
+let isl_aff_set_dim_name = foreign "isl_aff_set_dim_name" (Types.aff @-> dim_type @-> unsigned_int @-> string @-> returning Types.aff)
+let set_dim_name ctx aff typ pos s = 
+    let aff = aff_copy aff in
+    let ret = isl_aff_set_dim_name aff typ pos s in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
 let isl_aff_set_tuple_id = foreign "isl_aff_set_tuple_id" (Types.aff @-> dim_type @-> Types.id @-> returning Types.aff)
 let set_tuple_id ctx aff typ id = 
     let aff = aff_copy aff in
@@ -350,6 +420,14 @@ let isl_aff_val_on_domain = foreign "isl_aff_val_on_domain" (Types.local_space @
 let val_on_domain ctx ls value = 
     let ls = local_space_copy ls in
     let ret = isl_aff_val_on_domain ls value in
+    check_for_errors ctx;
+    Gc.finalise aff_free ret;
+    ret
+
+let isl_aff_var_on_domain = foreign "isl_aff_var_on_domain" (Types.local_space @-> dim_type @-> unsigned_int @-> returning Types.aff)
+let var_on_domain ctx ls typ pos = 
+    let ls = local_space_copy ls in
+    let ret = isl_aff_var_on_domain ls typ pos in
     check_for_errors ctx;
     Gc.finalise aff_free ret;
     ret

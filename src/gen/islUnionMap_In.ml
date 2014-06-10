@@ -4,6 +4,7 @@ module Make (Ctx: IslCtx.SIG): IslUnionMap_sigs.S with module Types := Types = s
     module Types = Types
 
     let n_map = n_map Ctx.ctx
+    let dim = dim Ctx.ctx
     let dump = dump Ctx.ctx
     let plain_is_injective = plain_is_injective Ctx.ctx
     let params = params Ctx.ctx
@@ -28,6 +29,7 @@ module Make (Ctx: IslCtx.SIG): IslUnionMap_sigs.S with module Types := Types = s
     let lex_le_union_map = lex_le_union_map Ctx.ctx
     let lex_lt_union_map = lex_lt_union_map Ctx.ctx
     let product = product Ctx.ctx
+    let project_out = project_out Ctx.ctx
     let range_map = range_map Ctx.ctx
     let range_product = range_product Ctx.ctx
     let reset_user = reset_user Ctx.ctx
@@ -38,6 +40,7 @@ module Make (Ctx: IslCtx.SIG): IslUnionMap_sigs.S with module Types := Types = s
     let domain = domain Ctx.ctx
     let range = range Ctx.ctx
     let wrap = wrap Ctx.ctx
+    let get_dim_id = get_dim_id Ctx.ctx
     let is_bijective = is_bijective Ctx.ctx
     let is_empty = is_empty Ctx.ctx
     let is_equal = is_equal Ctx.ctx

@@ -3,6 +3,7 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_val_sgn = foreign "isl_val_sgn" (Types.value @-> returning int)
 let sgn ctx v = 

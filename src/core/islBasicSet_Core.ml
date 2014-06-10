@@ -3,10 +3,17 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_basic_set_compare_at = foreign "isl_basic_set_compare_at" (Types.basic_set @-> Types.basic_set @-> int @-> returning int)
 let compare_at ctx bset1 bset2 pos = 
     let ret = isl_basic_set_compare_at bset1 bset2 pos in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_involves_dims = foreign "isl_basic_set_involves_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning int)
+let involves_dims ctx bset typ first n = 
+    let ret = isl_basic_set_involves_dims bset typ first n in
     check_for_errors ctx;
     ret
 
@@ -16,9 +23,39 @@ let n_constraint ctx bset =
     check_for_errors ctx;
     ret
 
+let isl_basic_set_dim = foreign "isl_basic_set_dim" (Types.basic_set @-> dim_type @-> returning unsigned_int)
+let dim ctx bset typ = 
+    let ret = isl_basic_set_dim bset typ in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_n_dim = foreign "isl_basic_set_n_dim" (Types.basic_set @-> returning unsigned_int)
+let n_dim ctx bset = 
+    let ret = isl_basic_set_n_dim bset in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_n_param = foreign "isl_basic_set_n_param" (Types.basic_set @-> returning unsigned_int)
+let n_param ctx bset = 
+    let ret = isl_basic_set_n_param bset in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_total_dim = foreign "isl_basic_set_total_dim" (Types.basic_set @-> returning unsigned_int)
+let total_dim ctx bset = 
+    let ret = isl_basic_set_total_dim bset in
+    check_for_errors ctx;
+    ret
+
 let isl_basic_set_compute_divs = foreign "isl_basic_set_compute_divs" (Types.basic_set @-> returning Types.set)
 let compute_divs ctx bset = 
     let ret = isl_basic_set_compute_divs bset in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_alloc = foreign "isl_basic_set_alloc" (Types.ctx @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let alloc ctx nparam dim extra n_eq n_ineq = 
+    let ret = isl_basic_set_alloc ctx nparam dim extra n_eq n_ineq in
     check_for_errors ctx;
     ret
 
@@ -34,6 +71,18 @@ let empty_like ctx bset =
     check_for_errors ctx;
     ret
 
+let isl_basic_set_extend = foreign "isl_basic_set_extend" (Types.basic_set @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let extend ctx base nparam dim extra n_eq n_ineq = 
+    let ret = isl_basic_set_extend base nparam dim extra n_eq n_ineq in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_extend_constraints = foreign "isl_basic_set_extend_constraints" (Types.basic_set @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let extend_constraints ctx base n_eq n_ineq = 
+    let ret = isl_basic_set_extend_constraints base n_eq n_ineq in
+    check_for_errors ctx;
+    ret
+
 let isl_basic_set_finalize = foreign "isl_basic_set_finalize" (Types.basic_set @-> returning Types.basic_set)
 let finalize ctx bset = 
     let ret = isl_basic_set_finalize bset in
@@ -43,6 +92,12 @@ let finalize ctx bset =
 let isl_basic_set_from_basic_map = foreign "isl_basic_set_from_basic_map" (Types.basic_map @-> returning Types.basic_set)
 let from_basic_map ctx bmap = 
     let ret = isl_basic_set_from_basic_map bmap in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_from_constraint = foreign "isl_basic_set_from_constraint" (Types.constrnt @-> returning Types.basic_set)
+let from_constraint ctx constrnt = 
+    let ret = isl_basic_set_from_constraint constrnt in
     check_for_errors ctx;
     ret
 
@@ -67,6 +122,12 @@ let universe_like ctx bset =
 let isl_basic_set_dump = foreign "isl_basic_set_dump" (Types.basic_set @-> returning void)
 let dump ctx bset = 
     let ret = isl_basic_set_dump bset in
+    check_for_errors ctx;
+    ret
+
+let isl_basic_set_get_dim_name = foreign "isl_basic_set_get_dim_name" (Types.basic_set @-> dim_type @-> unsigned_int @-> returning string)
+let get_dim_name ctx bset typ pos = 
+    let ret = isl_basic_set_get_dim_name bset typ pos in
     check_for_errors ctx;
     ret
 
@@ -133,6 +194,30 @@ let unwrap ctx bset =
     Gc.finalise basic_map_free ret;
     ret
 
+let isl_basic_set_add = foreign "isl_basic_set_add" (Types.basic_set @-> dim_type @-> unsigned_int @-> returning Types.basic_set)
+let add ctx bset typ n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_add bset typ n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_add_constraint = foreign "isl_basic_set_add_constraint" (Types.basic_set @-> Types.constrnt @-> returning Types.basic_set)
+let add_constraint ctx bset constrnt = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_add_constraint bset constrnt in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_add_dims = foreign "isl_basic_set_add_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> returning Types.basic_set)
+let add_dims ctx bset typ n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_add_dims bset typ n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
 let isl_basic_set_align_params = foreign "isl_basic_set_align_params" (Types.basic_set @-> Types.space @-> returning Types.basic_set)
 let align_params ctx bset model = 
     let bset = basic_set_copy bset in
@@ -150,10 +235,59 @@ let coefficients ctx bset =
     Gc.finalise basic_set_free ret;
     ret
 
+let isl_basic_set_drop_constraint = foreign "isl_basic_set_drop_constraint" (Types.basic_set @-> Types.constrnt @-> returning Types.basic_set)
+let drop_constraint ctx bset constrnt = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_drop_constraint bset constrnt in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_drop_constraints_involving_dims = foreign "isl_basic_set_drop_constraints_involving_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let drop_constraints_involving_dims ctx bset typ first n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_drop_constraints_involving_dims bset typ first n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_drop_constraints_not_involving_dims = foreign "isl_basic_set_drop_constraints_not_involving_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let drop_constraints_not_involving_dims ctx bset typ first n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_drop_constraints_not_involving_dims bset typ first n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_eliminate = foreign "isl_basic_set_eliminate" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let eliminate ctx bset typ first n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_eliminate bset typ first n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
 let isl_basic_set_empty = foreign "isl_basic_set_empty" (Types.space @-> returning Types.basic_set)
 let empty ctx dim = 
     let dim = space_copy dim in
     let ret = isl_basic_set_empty dim in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_fix_si = foreign "isl_basic_set_fix_si" (Types.basic_set @-> dim_type @-> unsigned_int @-> int @-> returning Types.basic_set)
+let fix_si ctx bset typ pos value = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_fix_si bset typ pos value in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_fix_val = foreign "isl_basic_set_fix_val" (Types.basic_set @-> dim_type @-> unsigned_int @-> Types.value @-> returning Types.basic_set)
+let fix_val ctx bset typ pos v = 
+    let bset = basic_set_copy bset in
+    let v = val_copy v in
+    let ret = isl_basic_set_fix_val bset typ pos v in
     check_for_errors ctx;
     Gc.finalise basic_set_free ret;
     ret
@@ -175,10 +309,26 @@ let from_params ctx bset =
     Gc.finalise basic_set_free ret;
     ret
 
+let isl_basic_set_insert_dims = foreign "isl_basic_set_insert_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let insert_dims ctx bset typ pos n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_insert_dims bset typ pos n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
 let isl_basic_set_lift = foreign "isl_basic_set_lift" (Types.basic_set @-> returning Types.basic_set)
 let lift ctx bset = 
     let bset = basic_set_copy bset in
     let ret = isl_basic_set_lift bset in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_move_dims = foreign "isl_basic_set_move_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let move_dims ctx bset dst_type dst_pos src_type src_pos n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_move_dims bset dst_type dst_pos src_type src_pos n in
     check_for_errors ctx;
     Gc.finalise basic_set_free ret;
     ret
@@ -215,10 +365,34 @@ let positive_orthant ctx space =
     Gc.finalise basic_set_free ret;
     ret
 
+let isl_basic_set_project_out = foreign "isl_basic_set_project_out" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let project_out ctx bset typ first n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_project_out bset typ first n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_remove_dims = foreign "isl_basic_set_remove_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let remove_dims ctx bset typ first n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_remove_dims bset typ first n in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
 let isl_basic_set_remove_divs = foreign "isl_basic_set_remove_divs" (Types.basic_set @-> returning Types.basic_set)
 let remove_divs ctx bset = 
     let bset = basic_set_copy bset in
     let ret = isl_basic_set_remove_divs bset in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_remove_divs_involving_dims = foreign "isl_basic_set_remove_divs_involving_dims" (Types.basic_set @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.basic_set)
+let remove_divs_involving_dims ctx bset typ first n = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_remove_divs_involving_dims bset typ first n in
     check_for_errors ctx;
     Gc.finalise basic_set_free ret;
     ret
@@ -235,6 +409,14 @@ let isl_basic_set_remove_unknown_divs = foreign "isl_basic_set_remove_unknown_di
 let remove_unknown_divs ctx bset = 
     let bset = basic_set_copy bset in
     let ret = isl_basic_set_remove_unknown_divs bset in
+    check_for_errors ctx;
+    Gc.finalise basic_set_free ret;
+    ret
+
+let isl_basic_set_set_dim_name = foreign "isl_basic_set_set_dim_name" (Types.basic_set @-> dim_type @-> unsigned_int @-> string @-> returning Types.basic_set)
+let set_dim_name ctx bset typ pos s = 
+    let bset = basic_set_copy bset in
+    let ret = isl_basic_set_set_dim_name bset typ pos s in
     check_for_errors ctx;
     Gc.finalise basic_set_free ret;
     ret
@@ -291,6 +473,13 @@ let get_div ctx bset pos =
     let ret = isl_basic_set_get_div bset pos in
     check_for_errors ctx;
     Gc.finalise aff_free ret;
+    ret
+
+let isl_basic_set_get_dim_id = foreign "isl_basic_set_get_dim_id" (Types.basic_set @-> dim_type @-> unsigned_int @-> returning Types.id)
+let get_dim_id ctx bset typ pos = 
+    let ret = isl_basic_set_get_dim_id bset typ pos in
+    check_for_errors ctx;
+    Gc.finalise id_free ret;
     ret
 
 let isl_basic_set_get_local_space = foreign "isl_basic_set_get_local_space" (Types.basic_set @-> returning Types.local_space)

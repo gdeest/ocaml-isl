@@ -3,10 +3,17 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_union_map_n_map = foreign "isl_union_map_n_map" (Types.union_map @-> returning int)
 let n_map ctx umap = 
     let ret = isl_union_map_n_map umap in
+    check_for_errors ctx;
+    ret
+
+let isl_union_map_dim = foreign "isl_union_map_dim" (Types.union_map @-> dim_type @-> returning unsigned_int)
+let dim ctx umap typ = 
+    let ret = isl_union_map_dim umap typ in
     check_for_errors ctx;
     ret
 
@@ -208,6 +215,14 @@ let product ctx umap1 umap2 =
     Gc.finalise union_map_free ret;
     ret
 
+let isl_union_map_project_out = foreign "isl_union_map_project_out" (Types.union_map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.union_map)
+let project_out ctx umap typ first n = 
+    let umap = union_map_copy umap in
+    let ret = isl_union_map_project_out umap typ first n in
+    check_for_errors ctx;
+    Gc.finalise union_map_free ret;
+    ret
+
 let isl_union_map_range_map = foreign "isl_union_map_range_map" (Types.union_map @-> returning Types.union_map)
 let range_map ctx umap = 
     let umap = union_map_copy umap in
@@ -287,6 +302,13 @@ let wrap ctx umap =
     let ret = isl_union_map_wrap umap in
     check_for_errors ctx;
     Gc.finalise union_set_free ret;
+    ret
+
+let isl_union_map_get_dim_id = foreign "isl_union_map_get_dim_id" (Types.union_map @-> dim_type @-> unsigned_int @-> returning Types.id)
+let get_dim_id ctx umap typ pos = 
+    let ret = isl_union_map_get_dim_id umap typ pos in
+    check_for_errors ctx;
+    Gc.finalise id_free ret;
     ret
 
 let isl_union_map_is_bijective = foreign "isl_union_map_is_bijective" (Types.union_map @-> returning bool)

@@ -3,6 +3,7 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_id_dump = foreign "isl_id_dump" (Types.id @-> returning void)
 let dump ctx id = 

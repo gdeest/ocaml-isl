@@ -3,6 +3,7 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_union_set_n_set = foreign "isl_union_set_n_set" (Types.union_set @-> returning int)
 let n_set ctx uset = 

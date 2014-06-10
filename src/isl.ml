@@ -4,6 +4,7 @@ let mk_context = IslCtx.create
 module Make (Ctx: IslCtx.SIG) = struct
   module Types = Types
   module Aff = IslAff_In.Make (Ctx)
+  module Space = IslSpace_In.Make (Ctx)
   module BasicMap = IslBasicMap.Make (Ctx)
   module BasicSet = IslBasicSet_In.Make (Ctx)
   module Constraint = IslConstraint_In.Make (Ctx)

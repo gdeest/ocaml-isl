@@ -34,3 +34,6 @@ let local_space_free = foreign "isl_local_space_free" (local_space @-> returning
 
 let id_copy = foreign "isl_id_copy" (id @-> returning id)
 let id_free = foreign "isl_id_free" (id @-> returning void)
+
+let constraint_copy = foreign "isl_constraint_copy" (constrnt @-> returning constrnt)
+let constraint_free = foreign "isl_constraint_free" (constrnt @-> returning void)

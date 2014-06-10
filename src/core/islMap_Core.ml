@@ -3,6 +3,7 @@ open Ctypes
 open Foreign
 open IslMemory
 open IslErrors
+open Unsigned
 
 let isl_map_find_dim_by_id = foreign "isl_map_find_dim_by_id" (Types.map @-> dim_type @-> Types.id @-> returning int)
 let find_dim_by_id ctx map typ id = 
@@ -13,6 +14,42 @@ let find_dim_by_id ctx map typ id =
 let isl_map_find_dim_by_name = foreign "isl_map_find_dim_by_name" (Types.map @-> dim_type @-> string @-> returning int)
 let find_dim_by_name ctx map typ name = 
     let ret = isl_map_find_dim_by_name map typ name in
+    check_for_errors ctx;
+    ret
+
+let isl_map_involves_dims = foreign "isl_map_involves_dims" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning int)
+let involves_dims ctx map typ first n = 
+    let ret = isl_map_involves_dims map typ first n in
+    check_for_errors ctx;
+    ret
+
+let isl_map_dim = foreign "isl_map_dim" (Types.map @-> dim_type @-> returning unsigned_int)
+let dim ctx map typ = 
+    let ret = isl_map_dim map typ in
+    check_for_errors ctx;
+    ret
+
+let isl_map_n_in = foreign "isl_map_n_in" (Types.map @-> returning unsigned_int)
+let n_in ctx map = 
+    let ret = isl_map_n_in map in
+    check_for_errors ctx;
+    ret
+
+let isl_map_n_out = foreign "isl_map_n_out" (Types.map @-> returning unsigned_int)
+let n_out ctx map = 
+    let ret = isl_map_n_out map in
+    check_for_errors ctx;
+    ret
+
+let isl_map_n_param = foreign "isl_map_n_param" (Types.map @-> returning unsigned_int)
+let n_param ctx map = 
+    let ret = isl_map_n_param map in
+    check_for_errors ctx;
+    ret
+
+let isl_map_alloc = foreign "isl_map_alloc" (Types.ctx @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> int @-> unsigned_int @-> returning Types.map)
+let alloc ctx nparam in_ out n flags = 
+    let ret = isl_map_alloc ctx nparam in_ out n flags in
     check_for_errors ctx;
     ret
 
@@ -34,9 +71,21 @@ let empty_like_basic_map ctx model =
     check_for_errors ctx;
     ret
 
+let isl_map_extend = foreign "isl_map_extend" (Types.map @-> unsigned_int @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let extend ctx base nparam n_in n_out = 
+    let ret = isl_map_extend base nparam n_in n_out in
+    check_for_errors ctx;
+    ret
+
 let isl_map_finalize = foreign "isl_map_finalize" (Types.map @-> returning Types.map)
 let finalize ctx map = 
     let ret = isl_map_finalize map in
+    check_for_errors ctx;
+    ret
+
+let isl_map_fix_input_si = foreign "isl_map_fix_input_si" (Types.map @-> unsigned_int @-> int @-> returning Types.map)
+let fix_input_si ctx map input value = 
+    let ret = isl_map_fix_input_si map input value in
     check_for_errors ctx;
     ret
 
@@ -55,6 +104,12 @@ let identity_like_basic_map ctx model =
 let isl_map_neg = foreign "isl_map_neg" (Types.map @-> returning Types.map)
 let neg ctx map = 
     let ret = isl_map_neg map in
+    check_for_errors ctx;
+    ret
+
+let isl_map_remove_inputs = foreign "isl_map_remove_inputs" (Types.map @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let remove_inputs ctx map first n = 
+    let ret = isl_map_remove_inputs map first n in
     check_for_errors ctx;
     ret
 
@@ -79,6 +134,12 @@ let copy_basic_map ctx map =
 let isl_map_dump = foreign "isl_map_dump" (Types.map @-> returning void)
 let dump ctx map = 
     let ret = isl_map_dump map in
+    check_for_errors ctx;
+    ret
+
+let isl_map_get_dim_name = foreign "isl_map_get_dim_name" (Types.map @-> dim_type @-> unsigned_int @-> returning string)
+let get_dim_name ctx map typ pos = 
+    let ret = isl_map_get_dim_name map typ pos in
     check_for_errors ctx;
     ret
 
@@ -121,6 +182,18 @@ let fast_is_empty ctx map =
 let isl_map_fast_is_equal = foreign "isl_map_fast_is_equal" (Types.map @-> Types.map @-> returning bool)
 let fast_is_equal ctx map1 map2 = 
     let ret = isl_map_fast_is_equal map1 map2 in
+    check_for_errors ctx;
+    ret
+
+let isl_map_has_dim_id = foreign "isl_map_has_dim_id" (Types.map @-> dim_type @-> unsigned_int @-> returning bool)
+let has_dim_id ctx map typ pos = 
+    let ret = isl_map_has_dim_id map typ pos in
+    check_for_errors ctx;
+    ret
+
+let isl_map_has_dim_name = foreign "isl_map_has_dim_name" (Types.map @-> dim_type @-> unsigned_int @-> returning bool)
+let has_dim_name ctx map typ pos = 
+    let ret = isl_map_has_dim_name map typ pos in
     check_for_errors ctx;
     ret
 
@@ -232,6 +305,22 @@ let add_basic_map ctx map bmap =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_add_constraint = foreign "isl_map_add_constraint" (Types.map @-> Types.constrnt @-> returning Types.map)
+let add_constraint ctx map constrnt = 
+    let map = map_copy map in
+    let ret = isl_map_add_constraint map constrnt in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_add_dims = foreign "isl_map_add_dims" (Types.map @-> dim_type @-> unsigned_int @-> returning Types.map)
+let add_dims ctx map typ n = 
+    let map = map_copy map in
+    let ret = isl_map_add_dims map typ n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_align_divs = foreign "isl_map_align_divs" (Types.map @-> returning Types.map)
 let align_divs ctx map = 
     let map = map_copy map in
@@ -298,6 +387,22 @@ let drop_basic_map ctx map bmap =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_drop_constraints_involving_dims = foreign "isl_map_drop_constraints_involving_dims" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let drop_constraints_involving_dims ctx map typ first n = 
+    let map = map_copy map in
+    let ret = isl_map_drop_constraints_involving_dims map typ first n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_eliminate = foreign "isl_map_eliminate" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let eliminate ctx map typ first n = 
+    let map = map_copy map in
+    let ret = isl_map_eliminate map typ first n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_empty = foreign "isl_map_empty" (Types.space @-> returning Types.map)
 let empty ctx dim = 
     let dim = space_copy dim in
@@ -310,6 +415,23 @@ let isl_map_equate = foreign "isl_map_equate" (Types.map @-> dim_type @-> int @-
 let equate ctx map type1 pos1 type2 pos2 = 
     let map = map_copy map in
     let ret = isl_map_equate map type1 pos1 type2 pos2 in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_fix_si = foreign "isl_map_fix_si" (Types.map @-> dim_type @-> unsigned_int @-> int @-> returning Types.map)
+let fix_si ctx map typ pos value = 
+    let map = map_copy map in
+    let ret = isl_map_fix_si map typ pos value in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_fix_val = foreign "isl_map_fix_val" (Types.map @-> dim_type @-> unsigned_int @-> Types.value @-> returning Types.map)
+let fix_val ctx map typ pos v = 
+    let map = map_copy map in
+    let v = val_copy v in
+    let ret = isl_map_fix_val map typ pos v in
     check_for_errors ctx;
     Gc.finalise map_free ret;
     ret
@@ -444,10 +566,26 @@ let identity ctx dim =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_insert_dims = foreign "isl_map_insert_dims" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let insert_dims ctx map typ pos n = 
+    let map = map_copy map in
+    let ret = isl_map_insert_dims map typ pos n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_lex_ge = foreign "isl_map_lex_ge" (Types.space @-> returning Types.map)
 let lex_ge ctx set_dim = 
     let set_dim = space_copy set_dim in
     let ret = isl_map_lex_ge set_dim in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_lex_ge_first = foreign "isl_map_lex_ge_first" (Types.space @-> unsigned_int @-> returning Types.map)
+let lex_ge_first ctx dim n = 
+    let dim = space_copy dim in
+    let ret = isl_map_lex_ge_first dim n in
     check_for_errors ctx;
     Gc.finalise map_free ret;
     ret
@@ -469,6 +607,14 @@ let lex_gt ctx set_dim =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_lex_gt_first = foreign "isl_map_lex_gt_first" (Types.space @-> unsigned_int @-> returning Types.map)
+let lex_gt_first ctx dim n = 
+    let dim = space_copy dim in
+    let ret = isl_map_lex_gt_first dim n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_lex_gt_map = foreign "isl_map_lex_gt_map" (Types.map @-> Types.map @-> returning Types.map)
 let lex_gt_map ctx map1 map2 = 
     let map1 = map_copy map1 in
@@ -482,6 +628,14 @@ let isl_map_lex_le = foreign "isl_map_lex_le" (Types.space @-> returning Types.m
 let lex_le ctx set_dim = 
     let set_dim = space_copy set_dim in
     let ret = isl_map_lex_le set_dim in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_lex_le_first = foreign "isl_map_lex_le_first" (Types.space @-> unsigned_int @-> returning Types.map)
+let lex_le_first ctx dim n = 
+    let dim = space_copy dim in
+    let ret = isl_map_lex_le_first dim n in
     check_for_errors ctx;
     Gc.finalise map_free ret;
     ret
@@ -503,6 +657,14 @@ let lex_lt ctx set_dim =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_lex_lt_first = foreign "isl_map_lex_lt_first" (Types.space @-> unsigned_int @-> returning Types.map)
+let lex_lt_first ctx dim n = 
+    let dim = space_copy dim in
+    let ret = isl_map_lex_lt_first dim n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_lex_lt_map = foreign "isl_map_lex_lt_map" (Types.map @-> Types.map @-> returning Types.map)
 let lex_lt_map ctx map1 map2 = 
     let map1 = map_copy map1 in
@@ -512,10 +674,26 @@ let lex_lt_map ctx map1 map2 =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_lower_bound_si = foreign "isl_map_lower_bound_si" (Types.map @-> dim_type @-> unsigned_int @-> int @-> returning Types.map)
+let lower_bound_si ctx map typ pos value = 
+    let map = map_copy map in
+    let ret = isl_map_lower_bound_si map typ pos value in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_make_disjoint = foreign "isl_map_make_disjoint" (Types.map @-> returning Types.map)
 let make_disjoint ctx map = 
     let map = map_copy map in
     let ret = isl_map_make_disjoint map in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_move_dims = foreign "isl_map_move_dims" (Types.map @-> dim_type @-> unsigned_int @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let move_dims ctx map dst_type dst_pos src_type src_pos n = 
+    let map = map_copy map in
+    let ret = isl_map_move_dims map dst_type dst_pos src_type src_pos n in
     check_for_errors ctx;
     Gc.finalise map_free ret;
     ret
@@ -577,6 +755,14 @@ let product ctx map1 map2 =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_project_out = foreign "isl_map_project_out" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let project_out ctx map typ first n = 
+    let map = map_copy map in
+    let ret = isl_map_project_out map typ first n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_range_factor_domain = foreign "isl_map_range_factor_domain" (Types.map @-> returning Types.map)
 let range_factor_domain ctx map = 
     let map = map_copy map in
@@ -610,10 +796,26 @@ let range_product ctx map1 map2 =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_remove_dims = foreign "isl_map_remove_dims" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let remove_dims ctx map typ first n = 
+    let map = map_copy map in
+    let ret = isl_map_remove_dims map typ first n in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_remove_divs = foreign "isl_map_remove_divs" (Types.map @-> returning Types.map)
 let remove_divs ctx map = 
     let map = map_copy map in
     let ret = isl_map_remove_divs map in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_remove_divs_involving_dims = foreign "isl_map_remove_divs_involving_dims" (Types.map @-> dim_type @-> unsigned_int @-> unsigned_int @-> returning Types.map)
+let remove_divs_involving_dims ctx map typ first n = 
+    let map = map_copy map in
+    let ret = isl_map_remove_divs_involving_dims map typ first n in
     check_for_errors ctx;
     Gc.finalise map_free ret;
     ret
@@ -646,6 +848,23 @@ let isl_map_reset_user = foreign "isl_map_reset_user" (Types.map @-> returning T
 let reset_user ctx map = 
     let map = map_copy map in
     let ret = isl_map_reset_user map in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_set_dim_id = foreign "isl_map_set_dim_id" (Types.map @-> dim_type @-> unsigned_int @-> Types.id @-> returning Types.map)
+let set_dim_id ctx map typ pos id = 
+    let map = map_copy map in
+    let id = id_copy id in
+    let ret = isl_map_set_dim_id map typ pos id in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
+let isl_map_set_dim_name = foreign "isl_map_set_dim_name" (Types.map @-> dim_type @-> unsigned_int @-> string @-> returning Types.map)
+let set_dim_name ctx map typ pos s = 
+    let map = map_copy map in
+    let ret = isl_map_set_dim_name map typ pos s in
     check_for_errors ctx;
     Gc.finalise map_free ret;
     ret
@@ -701,6 +920,14 @@ let universe ctx dim =
     Gc.finalise map_free ret;
     ret
 
+let isl_map_upper_bound_si = foreign "isl_map_upper_bound_si" (Types.map @-> dim_type @-> unsigned_int @-> int @-> returning Types.map)
+let upper_bound_si ctx map typ pos value = 
+    let map = map_copy map in
+    let ret = isl_map_upper_bound_si map typ pos value in
+    check_for_errors ctx;
+    Gc.finalise map_free ret;
+    ret
+
 let isl_map_zip = foreign "isl_map_zip" (Types.map @-> returning Types.map)
 let zip ctx map = 
     let map = map_copy map in
@@ -731,6 +958,20 @@ let unshifted_simple_hull ctx map =
     let ret = isl_map_unshifted_simple_hull map in
     check_for_errors ctx;
     Gc.finalise basic_map_free ret;
+    ret
+
+let isl_map_plain_get_val_if_fixed = foreign "isl_map_plain_get_val_if_fixed" (Types.map @-> dim_type @-> unsigned_int @-> returning Types.value)
+let plain_get_val_if_fixed ctx map typ pos = 
+    let ret = isl_map_plain_get_val_if_fixed map typ pos in
+    check_for_errors ctx;
+    Gc.finalise val_free ret;
+    ret
+
+let isl_map_get_dim_id = foreign "isl_map_get_dim_id" (Types.map @-> dim_type @-> unsigned_int @-> returning Types.id)
+let get_dim_id ctx map typ pos = 
+    let ret = isl_map_get_dim_id map typ pos in
+    check_for_errors ctx;
+    Gc.finalise id_free ret;
     ret
 
 let isl_map_get_tuple_id = foreign "isl_map_get_tuple_id" (Types.map @-> dim_type @-> returning Types.id)

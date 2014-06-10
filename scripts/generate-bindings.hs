@@ -152,9 +152,11 @@ camelize "" = ""
 moduleNameFromHeader :: String -> String
 moduleNameFromHeader header = camelize (reverse $ drop 2 $ reverse header)
 
+
 mlTypes :: M.Map ISLType String
 mlTypes = M.fromList [ (VOID, "void")
                      , (INT, "int")
+                     , (UINT, "unsigned_int")
                      , (ISL_CTX_PTR, "Types.ctx")
                      , (ISL_SET_PTR, "Types.set")
                      , (ISL_BASIC_SET_PTR, "Types.basic_set")
@@ -165,6 +167,7 @@ mlTypes = M.fromList [ (VOID, "void")
                      , (ISL_AFF_PTR, "Types.aff")
                      , (ISL_VAL_PTR, "Types.value")
                      , (ISL_SPACE_PTR, "Types.space")
+                     , (ISL_CONSTRAINT_PTR, "Types.constrnt")
                      , (CHAR_PTR, "string")
                      , (BOOL, "bool")
                      , (ISL_DIM_TYPE, "dim_type")
@@ -172,7 +175,10 @@ mlTypes = M.fromList [ (VOID, "void")
                      , (ISL_ID_PTR, "Types.id")
                      ]
 
-mlSigTypes = M.insert VOID "unit" mlTypes
+mlSigTypes = M.union sigList mlTypes
+  where sigList = M.fromList [ (VOID, "unit")
+                             , (UINT, "int")
+                             ]
 
 -- lookupType t | trace (show t) False = undefined
 lookupType t = M.lookup t mlTypes
@@ -249,9 +255,11 @@ writeModule name functions =
     hPutStrLn coreh "open Ctypes"
     hPutStrLn coreh "open Foreign"
     hPutStrLn coreh "open IslMemory"
-    hPutStrLn coreh "open IslErrors"    
+    hPutStrLn coreh "open IslErrors"
+    hPutStrLn coreh "open Unsigned"
     hPutStrLn coreh ""
     withFile ("src/gen/"++name'++"_sigs.ml") WriteMode $ \sigh -> do
+      hPutStrLn sigh "open Unsigned"      
       hPutStrLn sigh "open Types\n"
       hPutStrLn sigh "module type S = sig"
       hPutStrLn sigh "    module Types : Types.SIG"
@@ -426,6 +434,7 @@ memoryFunctions = M.fromList [ (ISL_SET_PTR, ("set_copy", "set_free"))
                              , (ISL_AFF_PTR, ("aff_copy", "aff_free"))
                              , (ISL_VAL_PTR, ("val_copy", "val_free"))
                              , (ISL_SPACE_PTR, ("space_copy", "space_free"))
+                             , (ISL_CONSTRAINT_PTR, ("constraint_copy", "constraint_free"))
                              , (ISL_LOCAL_SPACE_PTR, ("local_space_copy", "local_space_free"))
                              , (ISL_ID_PTR, ("id_copy", "id_free"))
                              , (CHAR_PTR, ("", "(fun _ -> ())"))
@@ -489,6 +498,8 @@ sanitizeFun (ISLFunction annotations t name params) =
                             [ ("mod", "modulo")
                             , ("type", "typ")
                             , ("val", "value")
+                            , ("in", "in_")
+                            , ("constraint", "constrnt")
                             ]
 
 mustKeepFun :: ISLFunction -> Bool
@@ -532,6 +543,7 @@ moduleMap = [ ("isl_aff_", "IslAff")
             , ("isl_map_", "IslMap")
             , ("isl_id_", "IslId")
             , ("isl_set_", "IslSet")
+            , ("isl_space_", "IslSpace")
             , ("isl_union_set_", "IslUnionSet")
             , ("isl_union_map_", "IslUnionMap")
             , ("isl_basic_set_", "IslBasicSet")
@@ -548,6 +560,7 @@ sanitizeFunName name = case (M.lookup name replacements) of
                               , ("mod", "modulo")
                               , ("read_from_str", "of_string")
                               , ("to_str", "to_string")
+                              , ("match", "match_")
                               ]
     
 

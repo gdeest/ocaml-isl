@@ -1,4 +1,5 @@
 open Ctypes
+open Unsigned
 
 module type SIG = sig
   type space
@@ -11,6 +12,7 @@ module type SIG = sig
   type aff
   type value
   type local_space
+  type constrnt
   type id
 end
 
@@ -47,10 +49,18 @@ let value : value typ = ptr void
 type local_space = unit ptr
 let local_space : local_space typ = ptr void
 
+type constrnt = unit ptr
+let constrnt : constrnt typ = ptr void
+
 type id = unit ptr
 let id : id typ = ptr void
 
+(* let uint : int typ = view ~read:(UInt.to_int) ~write:(UInt.of_int) Unsigned.uint *)
+
 type dim_type = DimCst | DimParam | DimIn | DimOut | DimSet | DimDiv | DimAll
+
+type unsigned_int = int
+let unsigned_int = view ~read:(Unsigned.UInt.to_int) ~write:(Unsigned.UInt.of_int) uint
 
 let int_of_dim_type = function
   | DimCst -> 0

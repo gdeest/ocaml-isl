@@ -1,8 +1,10 @@
+open Unsigned
 open Types
 
 module type S = sig
     module Types : Types.SIG
     val n_map : Types.union_map -> int
+    val dim : Types.union_map -> dim_type -> int
     val dump : Types.union_map -> unit
     val plain_is_injective : Types.union_map -> bool
     val params : Types.union_map -> Types.set
@@ -27,6 +29,7 @@ module type S = sig
     val lex_le_union_map : Types.union_map -> Types.union_map -> Types.union_map
     val lex_lt_union_map : Types.union_map -> Types.union_map -> Types.union_map
     val product : Types.union_map -> Types.union_map -> Types.union_map
+    val project_out : Types.union_map -> dim_type -> int -> int -> Types.union_map
     val range_map : Types.union_map -> Types.union_map
     val range_product : Types.union_map -> Types.union_map -> Types.union_map
     val reset_user : Types.union_map -> Types.union_map
@@ -37,6 +40,7 @@ module type S = sig
     val domain : Types.union_map -> Types.union_set
     val range : Types.union_map -> Types.union_set
     val wrap : Types.union_map -> Types.union_set
+    val get_dim_id : Types.union_map -> dim_type -> int -> Types.id
     val is_bijective : Types.union_map -> bool
     val is_empty : Types.union_map -> bool
     val is_equal : Types.union_map -> Types.union_map -> bool
