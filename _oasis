@@ -62,8 +62,22 @@ Executable hl
   BuildTools: ocamlbuild
   CompiledObject: native
   MainIs:     hlTest.ml
- 
+
+Executable buildSet
+  Install: false
+  Path:       src-tests
+  Build$: flag(tests)
+  BuildDepends: isl
+  BuildTools: ocamlbuild
+  CompiledObject: native
+  MainIs:     buildSet.ml
+
 Test "High-Level API"
   Type: Custom (0.0.1)
   Command: $hl
+  WorkingDirectory: /tmp
+
+Test "Build set"
+  Type: Custom (0.0.1)
+  Command: $buildSet
   WorkingDirectory: /tmp

@@ -25,4 +25,8 @@ module Make (Ctx: IslCtx.SIG): IslConstraint_sigs.S with module Types := Types =
     let set_coefficient_val = set_coefficient_val Ctx.ctx
     let set_constant_si = set_constant_si Ctx.ctx
     let set_constant_val = set_constant_val Ctx.ctx
+    let equality_alloc = equality_alloc Ctx.ctx
+    let equality_from_aff = equality_from_aff Ctx.ctx
+    let inequality_alloc = inequality_alloc Ctx.ctx
+    let inequality_from_aff = inequality_from_aff Ctx.ctx
 end

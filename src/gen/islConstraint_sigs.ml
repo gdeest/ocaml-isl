@@ -25,4 +25,8 @@ module type S = sig
     val set_coefficient_val : Types.constrnt -> dim_type -> int -> Types.value -> Types.constrnt
     val set_constant_si : Types.constrnt -> int -> Types.constrnt
     val set_constant_val : Types.constrnt -> Types.value -> Types.constrnt
+    val equality_alloc : Types.local_space -> Types.constrnt
+    val equality_from_aff : Types.aff -> Types.constrnt
+    val inequality_alloc : Types.local_space -> Types.constrnt
+    val inequality_from_aff : Types.aff -> Types.constrnt
 end

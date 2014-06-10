@@ -150,3 +150,35 @@ let set_constant_val ctx constrnt v =
     Gc.finalise constraint_free ret;
     ret
 
+let isl_equality_alloc = foreign "isl_equality_alloc" (Types.local_space @-> returning Types.constrnt)
+let equality_alloc ctx ls = 
+    let ls = local_space_copy ls in
+    let ret = isl_equality_alloc ls in
+    check_for_errors ctx;
+    Gc.finalise constraint_free ret;
+    ret
+
+let isl_equality_from_aff = foreign "isl_equality_from_aff" (Types.aff @-> returning Types.constrnt)
+let equality_from_aff ctx aff = 
+    let aff = aff_copy aff in
+    let ret = isl_equality_from_aff aff in
+    check_for_errors ctx;
+    Gc.finalise constraint_free ret;
+    ret
+
+let isl_inequality_alloc = foreign "isl_inequality_alloc" (Types.local_space @-> returning Types.constrnt)
+let inequality_alloc ctx ls = 
+    let ls = local_space_copy ls in
+    let ret = isl_inequality_alloc ls in
+    check_for_errors ctx;
+    Gc.finalise constraint_free ret;
+    ret
+
+let isl_inequality_from_aff = foreign "isl_inequality_from_aff" (Types.aff @-> returning Types.constrnt)
+let inequality_from_aff ctx aff = 
+    let aff = aff_copy aff in
+    let ret = isl_inequality_from_aff aff in
+    check_for_errors ctx;
+    Gc.finalise constraint_free ret;
+    ret
+

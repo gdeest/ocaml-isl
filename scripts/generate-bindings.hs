@@ -504,6 +504,7 @@ sanitizeFun (ISLFunction annotations t name params) =
 
 mustKeepFun :: ISLFunction -> Bool
 mustKeepFun (ISLFunction annots _ name _) =
+  "equality" `isInfixOf` name ||
   not ((elem ISL_NULL annots) || (isSuffixOf "_free" name) || (isSuffixOf "_copy" name) || (isSuffixOf "_get_ctx" name))
                             
 -- collectModules :: [String] -> ParseMonad ()
@@ -549,7 +550,10 @@ moduleMap = [ ("isl_aff_", "IslAff")
             , ("isl_basic_set_", "IslBasicSet")
             , ("isl_basic_map_", "IslBasicMap")
             , ("isl_val_", "IslValue")
-            , ("isl_ctx_", "IslCtx")]
+            , ("isl_ctx_", "IslCtx")
+            , ("isl_equality_", "IslConstraint")
+            , ("isl_inequality_", "IslConstraint")
+            ]
 
 sanitizeFunName :: String -> String
 sanitizeFunName name = case (M.lookup name replacements) of
@@ -564,13 +568,20 @@ sanitizeFunName name = case (M.lookup name replacements) of
                               ]
     
 
+handlePrefix :: String -> String -> String
+handlePrefix prefix name =
+  case prefix of
+    "isl_equality_" -> drop 4 name
+    "isl_inequality_" -> drop 4 name
+    _ -> drop (length prefix) name
+
 dispatch :: String -> Maybe (String, String)
 dispatch name = case matches of
   (x:xs) -> Just x
   _ -> Nothing
   where matches = catMaybes $ map tryMatch moduleMap
         tryMatch (prefix, modName) | prefix `isPrefixOf` name =
-          Just (modName, sanitizeFunName $ drop (length prefix) name)
+          Just (modName, sanitizeFunName $ handlePrefix prefix name)
         tryMatch (prefix, modName) = Nothing
 
 
