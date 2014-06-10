@@ -1,11 +1,14 @@
 ocaml-isl
 =========
 
-OCaml bindings for the Integer Set Library.
+OCaml bindings for the Integer Set Library (v0.13).
 
-# Examples
+## Status
+These bindings should be considered pre-alpha quality. As of now, they only offer a very thin layer over a fraction of ISL features. Bugs should be expected, and the API is likely to change to provide higher-level abstractions. Missing features will be added over time, as I either find a way to generate them automatically or take the time to write the bindings myself.
 
-## Basic usage:
+## Examples
+
+### Basic usage:
 ```ocaml
 (* Create a new module with a unique context. *)
 module IIsl = Isl.Make (struct 
