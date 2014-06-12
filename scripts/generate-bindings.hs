@@ -69,15 +69,6 @@ data MLFunction = MLFunction ISLFunction Identifier
 
 data Module = Module String (S.Set ISLFunction)
 
-instance Show Module where
-  show (Module identifier functions) =
-    "Module name: " ++ identifier ++ "\n" ++
-    "Module functions: \n" ++
-    functionList
-    where
-      functionList = S.foldr prependFunction "" functions
-      prependFunction f str = (maybe "" id (toCamlDeclaration f)) ++ "\n" ++ str
-
 type ParseMonad = StateT (M.Map String (S.Set MLFunction)) IO
 -- type ParseMonad = WriterT [Module] IO
 
@@ -184,34 +175,6 @@ mlSigTypes = M.union sigList mlTypes
 lookupType t = M.lookup t mlTypes
 lookupSig t = M.lookup t mlSigTypes
 
-
-toCamlDeclaration :: ISLFunction -> Maybe String
--- toCamlDeclaration f@(ISLFunction annots t name params) | trace name False = undefined
-toCamlDeclaration (ISLFunction annots t name params) = do
-  mlRetType <- lookupType t
-  mlParamTypes <-
-    case params of
-      [] -> return ["void"]
-      _ -> sequence $ map lookupType $ map (\(ISLParam _ t _) -> t) params
-  wrappedParams <- fmap concat (sequence $ map wrapParam params)
-  retWrap <- gcWrap
-  let paramPart = concat (intersperse " @-> " mlParamTypes)
-  let cFun = "let "++ name ++ " = foreign \"" ++ name ++ "\" (" ++ paramPart ++ " @-> returning " ++ mlRetType ++ ")\n"
-  return $ cFun ++ header ++ wrappedParams ++ cFun ++ cFunCall ++ retWrap ++ "    ret\n"
-  where header = "let " ++ funName ++ " " ++ paramList ++ " = \n"
-        funName = if isPrefixOf "isl_" name then drop 4 name else name
-        wrapParam (ISLParam annots t name) =
-          if elem ISL_TAKE annots then
-            do (copyFun,_) <- lookupMemFunctions t
-               return $ "    let " ++ name ++ " = " ++ copyFun ++ " " ++ name ++ " in\n"
-          else return ""
-        cFunCall = "    let ret = " ++ name ++ " " ++ paramList ++ " in\n"
-        gcWrap = if elem ISL_GIVE annots then
-                   do (_,freeFun) <- lookupMemFunctions t
-                      return $ "    Gc.finalise " ++ freeFun ++ " ret;\n"
-                 else return ""
-        paramList = concat (intersperse " " paramNames)
-        paramNames = map (\(ISLParam _ _ id) -> id) params
 
 toInDecl :: MLFunction -> Maybe String
 toInDecl (MLFunction (ISLFunction annots t name params) mlName) = do
